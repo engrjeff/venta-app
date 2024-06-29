@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccounType {
+  USER
+  ADMIN
+}
+
+enum PaymentType {
+  CASH
+  EWALLET
+  BANK
+}
+
+enum Status {
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  first_name   String
+  last_name    String
+  email        String     @unique
+  password     String
+  account_type AccounType @default(USER)
+  contact      String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  created_invoices Invoice[]
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String @unique
+  code String @unique
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  products   Product[]
+
+  status Status @default(ACTIVE)
+}
+
+model Unit {
+  id     String @id @default(cuid())
+  name   String @unique
+  symbol String @unique
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  products   Product[]
+
+  status Status @default(ACTIVE)
+}
+
+model Promo {
+  id               String @id @default(cuid())
+  promo_code       String @unique
+  symbol           String @unique
+  percent_discount Float
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  sales Sales[]
+
+  status Status @default(ACTIVE)
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String   @unique
+  category    Category @relation(fields: [category_id], references: [id])
+  category_id String
+  unit        Unit     @relation(fields: [unit_id], references: [id])
+  unit_id     String
+  price       Float
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  sales Sales[]
+
+  status Status @default(ACTIVE)
+}
+
+model Customer {
+  id      String  @id @default(cuid())
+  name    String
+  contact String?
+  address String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  invoices Invoice[]
+}
+
+model Invoice {
+  id           String      @id @default(cuid())
+  customer     Customer    @relation(fields: [customer_id], references: [id])
+  customer_id  String
+  payment_type PaymentType
+  total_amount Float
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String
+
+  sales Sales[]
+}
+
+model Sales {
+  id String @id @default(cuid())
+
+  invoice    Invoice @relation(fields: [invoice_id], references: [id])
+  invoice_id String
+
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id String
+
+  quantity Int
+
+  promo    Promo?  @relation(fields: [promo_id], references: [id])
+  promo_id String?
+
+  sub_total  Float
+  unit_price Float
+  discount   Float?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
