@@ -15,16 +15,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export function NewCategoryForm() {
+export function NewCategoryForm({ initialValue }: { initialValue?: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="secondary"
-          className="mb-1 w-full justify-start"
-        >
-          <PlusIcon className="mr-3 size-4" /> Add new
+        <Button size="sm" variant="secondary" className="mb-1 justify-start">
+          <PlusIcon className="mr-3 size-4" /> Add{" "}
+          {initialValue ? `"${initialValue}"` : "New"}
         </Button>
       </DialogTrigger>
       <DialogContent
@@ -39,7 +36,11 @@ export function NewCategoryForm() {
             <Label htmlFor="name" className="text-right">
               Name <span>*</span>
             </Label>
-            <Input id="name" placeholder="Category name" />
+            <Input
+              id="name"
+              placeholder="Category name"
+              defaultValue={initialValue}
+            />
           </div>
         </div>
         <DialogFooter>

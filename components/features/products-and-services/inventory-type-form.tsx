@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDownIcon, PlusIcon } from "lucide-react"
+import { ChevronDownIcon } from "lucide-react"
 import { useForm } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
@@ -19,16 +19,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { ImagePicker } from "@/components/ui/image-picker"
 import { Input } from "@/components/ui/input"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { AppCombobox } from "@/components/shared/app-combobox"
 
 import { NewCategoryForm } from "./new-category-form"
 import { NewUnitForm } from "./new-unit-form"
@@ -84,7 +84,21 @@ export function InventoryTypeForm() {
                 )}
               />
             </div>
-            <div className="w-32">Image here</div>
+            <div className="w-32">
+              <FormField
+                name="image"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Image</FormLabel>
+                    <FormControl>
+                      <ImagePicker />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
           <FormField
             control={form.control}
@@ -92,22 +106,23 @@ export function InventoryTypeForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <NewCategoryForm />
-                    <SelectItem value="category1">Category 1</SelectItem>
-                    <SelectItem value="category2">Category 2</SelectItem>
-                    <SelectItem value="category3">Category 3</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <AppCombobox
+                    label="Select category"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={[
+                      { value: "cat1", label: "Category 1" },
+                      { value: "cat2", label: "Category 2" },
+                      { value: "cat3", label: "Category 3" },
+                    ]}
+                    renderEmpty={(search) => (
+                      <div className="flex items-center justify-center text-center">
+                        <NewCategoryForm initialValue={search} />
+                      </div>
+                    )}
+                  />
+                </FormControl>
                 <FormDescription>
                   A way to classify product items.
                 </FormDescription>
@@ -138,22 +153,21 @@ export function InventoryTypeForm() {
                 <FormItem>
                   <FormLabel>Unit</FormLabel>
                   <FormControl>
-                    <Select
+                    <AppCombobox
+                      label="Unit"
+                      value={field.value}
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Unit" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <NewUnitForm />
-                        <SelectItem value="pc">pc</SelectItem>
-                        <SelectItem value="kg">kg</SelectItem>
-                        <SelectItem value="ml">ml</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      options={[
+                        { value: "kg", label: "kg" },
+                        { value: "ml", label: "ml" },
+                        { value: "pc", label: "pc" },
+                      ]}
+                      renderEmpty={(search) => (
+                        <div className="flex items-center justify-center text-center">
+                          <NewUnitForm initialValue={search} />
+                        </div>
+                      )}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,7 +184,22 @@ export function InventoryTypeForm() {
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
-                  <FormDescription>What is this?</FormDescription>
+                  <Popover>
+                    <PopoverTrigger>
+                      <FormDescription className="hover:underline">
+                        What is as of date?
+                      </FormDescription>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="start"
+                      className="w-52 border bg-muted text-xs"
+                    >
+                      <p>
+                        The inventory as of date is the date you start tracking
+                        the quantity on hand of an inventory item in Venta.
+                      </p>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
@@ -189,7 +218,22 @@ export function InventoryTypeForm() {
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>What is this?</FormDescription>
+                  <Popover>
+                    <PopoverTrigger>
+                      <FormDescription className="hover:underline">
+                        What is reorder point?
+                      </FormDescription>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="start"
+                      className="w-52 border bg-muted text-xs"
+                    >
+                      <p>
+                        A reorder point is the threshold when you should reorder
+                        more of an inventory item.
+                      </p>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
@@ -202,23 +246,17 @@ export function InventoryTypeForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Inventory Asset Account</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose Inventory Asset" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <NewCategoryForm />
-                    <SelectItem value="inventory">Inventory</SelectItem>
-                    <SelectItem value="inventory_asset">
-                      Inventory Asset
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <AppCombobox
+                    label="Choose Inventory Asset"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={[
+                      { value: "inventory", label: "Inventory" },
+                      { value: "inventory_asset", label: "Inventory Asset" },
+                    ]}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -263,26 +301,16 @@ export function InventoryTypeForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Income Account</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Income Account" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="mb-1 w-full justify-start"
-                      >
-                        <PlusIcon className="mr-3 size-4" /> Add new
-                      </Button>
-                      <SelectItem value="1">Sales of Product Income</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <AppCombobox
+                      label="Income Account"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      options={[
+                        { value: "1", label: "Sales of Product Income" },
+                      ]}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -326,26 +354,14 @@ export function InventoryTypeForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Expense Account</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Expense Account" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="mb-1 w-full justify-start"
-                      >
-                        <PlusIcon className="mr-3 size-4" /> Add new
-                      </Button>
-                      <SelectItem value="1">Cost of sales</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <AppCombobox
+                      label="Expense Account"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      options={[{ value: "1", label: "Cost of sales" }]}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -357,27 +373,16 @@ export function InventoryTypeForm() {
                 <FormItem>
                   <FormLabel>Preferred Supplier</FormLabel>
                   <FormControl>
-                    <Select
+                    <AppCombobox
+                      label="Preferred supplier"
+                      value={field.value}
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select preferred supplier" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="mb-1 w-full justify-start"
-                        >
-                          <PlusIcon className="mr-3 size-4" /> Add new
-                        </Button>
-                        <SelectItem value="1">Supplier 1</SelectItem>
-                        <SelectItem value="2">Supplier 2</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      options={[
+                        { value: "1", label: "Supplier 1" },
+                        { value: "2", label: "Supplier 2" },
+                        { value: "3", label: "Supplier 3" },
+                      ]}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

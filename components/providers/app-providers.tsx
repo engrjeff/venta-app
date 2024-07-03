@@ -1,5 +1,6 @@
-import React from "react";
-import { ThemeProvider } from "./theme-provider";
+import React from "react"
+
+import { ThemeProvider } from "./theme-provider"
 
 function AppProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +12,7 @@ function AppProviders({ children }: { children: React.ReactNode }) {
     >
       {children}
     </ThemeProvider>
-  );
+  )
 }
 
-export default AppProviders;
+export default AppProviders

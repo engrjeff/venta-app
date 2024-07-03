@@ -26,7 +26,9 @@ export function ProductServiceForm() {
   function handleProducTypeChange(value: string) {
     setProductType(value as ProductType)
 
-    setView("form")
+    setTimeout(() => {
+      setView("form")
+    }, 500)
   }
 
   if (!productType)
