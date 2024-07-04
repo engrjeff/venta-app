@@ -19,7 +19,11 @@ export function NewCategoryForm({ initialValue }: { initialValue?: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" className="mb-1 justify-start">
+        <Button
+          size="sm"
+          variant="secondary"
+          className="mb-1 w-full justify-start"
+        >
           <PlusIcon className="mr-3 size-4" /> Add{" "}
           {initialValue ? `"${initialValue}"` : "New"}
         </Button>

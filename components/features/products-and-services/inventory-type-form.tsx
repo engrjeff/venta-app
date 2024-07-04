@@ -30,7 +30,11 @@ import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { AppCombobox } from "@/components/shared/app-combobox"
 
+import { ExpenseAccountForm } from "../account-types/ExpenseAccountForm"
+import { IncomeAccountForm } from "../account-types/IncomeAccountForm"
+import { InventoryAssetAccountForm } from "../account-types/InventoryAssetAccountForm"
 import { NewCategoryForm } from "./new-category-form"
+import { NewSupplierForm } from "./new-supplier-form"
 import { NewUnitForm } from "./new-unit-form"
 
 export function InventoryTypeForm() {
@@ -117,9 +121,7 @@ export function InventoryTypeForm() {
                       { value: "cat3", label: "Category 3" },
                     ]}
                     renderEmpty={(search) => (
-                      <div className="flex items-center justify-center text-center">
-                        <NewCategoryForm initialValue={search} />
-                      </div>
+                      <NewCategoryForm initialValue={search} />
                     )}
                   />
                 </FormControl>
@@ -163,9 +165,7 @@ export function InventoryTypeForm() {
                         { value: "pc", label: "pc" },
                       ]}
                       renderEmpty={(search) => (
-                        <div className="flex items-center justify-center text-center">
-                          <NewUnitForm initialValue={search} />
-                        </div>
+                        <NewUnitForm initialValue={search} />
                       )}
                     />
                   </FormControl>
@@ -255,6 +255,9 @@ export function InventoryTypeForm() {
                       { value: "inventory", label: "Inventory" },
                       { value: "inventory_asset", label: "Inventory Asset" },
                     ]}
+                    renderEmpty={(search) => (
+                      <InventoryAssetAccountForm initialNameValue={search} />
+                    )}
                   />
                 </FormControl>
                 <FormMessage />
@@ -309,6 +312,9 @@ export function InventoryTypeForm() {
                       options={[
                         { value: "1", label: "Sales of Product Income" },
                       ]}
+                      renderEmpty={(search) => (
+                        <IncomeAccountForm initialNameValue={search} />
+                      )}
                     />
                   </FormControl>
                   <FormMessage />
@@ -360,6 +366,9 @@ export function InventoryTypeForm() {
                       value={field.value}
                       onValueChange={field.onChange}
                       options={[{ value: "1", label: "Cost of sales" }]}
+                      renderEmpty={(search) => (
+                        <ExpenseAccountForm initialNameValue={search} />
+                      )}
                     />
                   </FormControl>
                   <FormMessage />
@@ -382,6 +391,9 @@ export function InventoryTypeForm() {
                         { value: "2", label: "Supplier 2" },
                         { value: "3", label: "Supplier 3" },
                       ]}
+                      renderEmpty={(search) => (
+                        <NewSupplierForm initialValue={search} />
+                      )}
                     />
                   </FormControl>
                   <FormMessage />

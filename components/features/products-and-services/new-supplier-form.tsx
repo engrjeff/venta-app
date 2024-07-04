@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export function NewUnitForm({ initialValue }: { initialValue?: string }) {
+export function NewSupplierForm({ initialValue }: { initialValue?: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -33,16 +33,16 @@ export function NewUnitForm({ initialValue }: { initialValue?: string }) {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>New Unit</DialogTitle>
+          <DialogTitle>New Supplier</DialogTitle>
         </DialogHeader>
         <div>
           <div className="space-y-2">
             <Label htmlFor="name" className="text-right">
-              Name <span>*</span>
+              Supplier display name <span>*</span>
             </Label>
             <Input
               id="name"
-              placeholder="Unit name e.g. kg"
+              placeholder="Enter supplier name"
               defaultValue={initialValue}
             />
           </div>

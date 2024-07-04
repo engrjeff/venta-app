@@ -95,9 +95,12 @@ export function AppCombobox({
             className="h-9"
           />
           <CommandList>
-            <CommandEmpty>
-              {renderEmpty ? renderEmpty(search) : "No item found."}
-            </CommandEmpty>
+            {renderEmpty ? (
+              <div className="px-1 pt-2">{renderEmpty(search)}</div>
+            ) : (
+              <CommandEmpty>No item found.</CommandEmpty>
+            )}
+
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
