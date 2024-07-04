@@ -9,7 +9,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       <AppSideBar />
       <div className="absolute inset-0 left-[240px] flex flex-col bg-muted/40">
         <AppHeader />
-        <main className="p-4">{children}</main>
+        <main className="p-3">{children}</main>
       </div>
     </div>
   )
