@@ -1,152 +1,623 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-}
-
-enum AccounType {
+enum ROLE {
   USER
   ADMIN
 }
 
-enum PaymentType {
-  CASH
-  EWALLET
-  BANK
-}
-
-enum Status {
-  ACTIVE
-  ARCHIVED
-  DELETED
-}
-
 model User {
-  id           String     @id @default(cuid())
-  first_name   String
-  last_name    String
-  email        String     @unique
-  password     String
-  account_type AccounType @default(USER)
-  contact      String
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  hashedPassword String?
+  role           ROLE    @default(USER)
 
-  created_invoices Invoice[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stores              Store[]
+  productServiceItems ProductServiceItem[]
+  categories          Category[]
+  suppliers           Supplier[]
+  customers           Customer[]
+  paymentMethods      PaymentMethod[]
+  expenses            Expense[]
+  bills               Bill[]
+  bookAccounts        BookAccount[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  email      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+enum StoreStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Store {
+  id        String  @id @default(cuid())
+  logo      String
+  name      String
+  slug      String
+  legalName String
+  vatNumber String?
+  email     String
+  phone     String?
+  website   String?
+
+  status StoreStatus @default(ACTIVE)
+
+  addressId               String?
+  customerFacingAddressId String?
+  legalAddressId          String?
+
+  address               Address? @relation(name: "address", fields: [addressId], references: [id])
+  customerFacingAddress Address? @relation(name: "customerFacingAddress", fields: [customerFacingAddressId], references: [id])
+  legalAddress          Address? @relation(name: "legalAddress", fields: [legalAddressId], references: [id])
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  productServiceItems ProductServiceItem[]
+  categoris           Category[]
+  suppliers           Supplier[]
+  customers           Customer[]
+  invoices            Invoice[]
+  storeTags           StoreTag[]
+  storeTagGroups      StoreTagGroup[]
+  paymentMethods      PaymentMethod[]
+  expenses            Expense[]
+  bills               Bill[]
+  bookAccounts        BookAccount[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([slug])
+  @@index([ownerId, id])
+  @@index([ownerId, slug])
+}
+
+model Address {
+  id      String @id @default(cuid())
+  street  String
+  city    String
+  state   String
+  zipCode String
+  country String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  storeAddresses               Store[]    @relation(name: "address")
+  storeCustomerFacingAddresses Store[]    @relation(name: "customerFacingAddress")
+  storeLegalAddress            Store[]    @relation(name: "legalAddress")
+  supplierAddress              Supplier[] @relation(name: "supplierAddress")
+  customerBillingAddress       Customer[] @relation(name: "customerBillingAddress")
+  customerShippingAddress      Customer[] @relation(name: "customerShippingAddress")
+}
+
+enum ProductServiceStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ProductServiceStockStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+}
+
+enum ProductServiceType {
+  INVENTORY
+  NON_INVENTORY
+  SERVICE
+  BUNDLE
+}
+
+model ProductServiceItem {
+  id   String  @id @default(cuid())
+  name String
+  sku  String?
+
+  status      ProductServiceStatus      @default(ACTIVE)
+  stockStatus ProductServiceStockStatus @default(IN_STOCK)
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  image String?
+
+  initialQuantity  Int? // only if type = INVENTORY
+  asOfDate         DateTime?
+  reorderPoint     Float?
+  description      String?
+  salesPriceOrRate Float?
+
+  inventoryAssetAccount   BookAccount @relation(name: "inventoryAssetAccount", fields: [inventoryAssetAccountId], references: [id])
+  inventoryAssetAccountId String
+
+  incomeAccount   BookAccount @relation(name: "incomeAccount", fields: [incomeAccountId], references: [id])
+  incomeAccountId String
+
+  purchasingDescription String?
+  cost                  Float?
+
+  expenseAccount   BookAccount @relation(name: "expenseAccount", fields: [expenseAccountId], references: [id])
+  expenseAccountId String
+
+  isSelling    Boolean? @default(true)
+  isPurchasing Boolean? @default(true)
+
+  bundledProducts ProductBundleItem[] @relation(name: "bundledProducts")
+
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  invoices InvoiceItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([ownerId])
+  @@index([ownerId, storeId])
+}
+
+model ProductBundleItem {
+  id        String             @id @default(cuid())
+  product   ProductServiceItem @relation(name: "bundledProducts", fields: [productId], references: [id])
+  quantity  Int
+  productId String
+
+  @@index([productId])
 }
 
 model Category {
+  id String @id @default(cuid())
+
+  name String
+
+  productServiceItems ProductServiceItem[]
+
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([ownerId])
+  @@index([ownerId, storeId])
+}
+
+model BookAccount {
+  id          String  @id @default(cuid())
+  description String?
+
+  accountType   BookAccountType @relation(fields: [accountTypeId], references: [id])
+  accountTypeId String
+
+  detailType   BookDetailType @relation(fields: [detailTypeId], references: [id])
+  detailTypeId String
+
+  itemsInventoryAssetAccount ProductServiceItem[] @relation(name: "inventoryAssetAccount")
+  itemsIncomeAccount         ProductServiceItem[] @relation(name: "incomeAccount")
+  itemsExpenseAccount        ProductServiceItem[] @relation(name: "expenseAccount")
+
+  expenseItemsUnderThisAccount ExpenseItem[]
+  billItemsUnderThisAccount    BillItem[]
+
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([storeId])
+  @@index([ownerId, storeId])
+}
+
+model BookAccountType {
+  id      String @id @default(cuid())
+  name    String
+  balance Float?
+
+  bookAccounts BookAccount[]
+  detailTypes  BookDetailType[]
+
+  expensesUnderThis Expense[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BookDetailType {
+  id      String @id @default(cuid())
+  name    String
+  balance Float?
+
+  accountType   BookAccountType @relation(fields: [accountTypeId], references: [id])
+  accountTypeId String
+
+  bookAccounts BookAccount[]
+
+  expenseItemsUnderThis ExpenseItem[]
+  billItemsUnderThis    BillItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Supplier {
   id   String @id @default(cuid())
-  name String @unique
-  code String @unique
+  name String
 
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  products   Product[]
+  title      String? // e.g. Mr, Mrs, Sir
+  firstName  String?
+  middleName String?
+  lastName   String?
+  suffix     String?
 
-  status Status @default(ACTIVE)
-}
+  companyName  String?
+  email        String?
+  phoneNumber  String?
+  mobileNumber String?
+  fax          String?
+  website      String?
 
-model Unit {
-  id     String @id @default(cuid())
-  name   String @unique
-  symbol String @unique
+  billsPaidToThis Bill[]
 
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  products   Product[]
+  address   Address @relation(name: "supplierAddress", fields: [addressId], references: [id])
+  addressId String
 
-  status Status @default(ACTIVE)
-}
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
 
-model Promo {
-  id               String @id @default(cuid())
-  promo_code       String @unique
-  symbol           String @unique
-  percent_discount Float
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  sales Sales[]
-
-  status Status @default(ACTIVE)
-}
-
-model Product {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  code        String   @unique
-  category    Category @relation(fields: [category_id], references: [id])
-  category_id String
-  unit        Unit     @relation(fields: [unit_id], references: [id])
-  unit_id     String
-  price       Float
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  sales Sales[]
-
-  status Status @default(ACTIVE)
+  @@index([storeId])
+  @@index([ownerId])
+  @@index([ownerId, storeId])
 }
 
 model Customer {
-  id      String  @id @default(cuid())
-  name    String
-  contact String?
-  address String?
+  id   String @id @default(cuid())
+  name String
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  title      String? // e.g. Mr, Mrs, Sir
+  firstName  String?
+  middleName String?
+  lastName   String?
+  suffix     String?
+
+  companyName  String?
+  email        String?
+  phoneNumber  String?
+  mobileNumber String?
+  fax          String?
+  website      String?
+
+  billingAddress   Address @relation(name: "customerBillingAddress", fields: [billingAddressId], references: [id])
+  billingAddressId String
+
+  shippingAddress   Address @relation(name: "customerShippingAddress", fields: [shippingAddressId], references: [id])
+  shippingAddressId String
+
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
 
   invoices Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([ownerId])
+  @@index([ownerId, storeId])
+}
+
+enum InvoiceTerms {
+  DUE_ON_RECEIPT
+  NET15
+  NET30
+  NET60
+  CUSTOM
+}
+
+enum InvoiceStatus {
+  NEEDS_ATTENTION
+  OVERDUE
+  NOT_DUE
+  NOT_DEPOSITED
+  DEPOSITED
 }
 
 model Invoice {
-  id           String      @id @default(cuid())
-  customer     Customer    @relation(fields: [customer_id], references: [id])
-  customer_id  String
-  payment_type PaymentType
-  total_amount Float
+  id            String @id @default(cuid())
+  invoiceNumber String
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String
 
-  user    User   @relation(fields: [user_id], references: [id])
-  user_id String
+  status      InvoiceStatus
+  terms       InvoiceTerms  @default(DUE_ON_RECEIPT)
+  invoiceDate DateTime
+  dueDate     DateTime
 
-  sales Sales[]
+  items InvoiceItem[]
+
+  tags StoreTag[]
+
+  messageOnInvoice   String?
+  messageOnStateMent String?
+
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
+
+  attachments     String[] // file/media urls
+  receivingEmails String[] // array of emails
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
 }
 
-model Sales {
+model InvoiceItem {
+  id          String             @id @default(cuid())
+  serviceDate DateTime
+  item        ProductServiceItem @relation(fields: [itemId], references: [id])
+  itemId      String
+  invoice     Invoice?           @relation(fields: [invoiceId], references: [id])
+  invoiceId   String?
+
+  @@index([invoiceId])
+}
+
+model StoreTag {
+  id   String @id @default(cuid())
+  name String
+
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
+
+  group   StoreTagGroup? @relation(fields: [groupId], references: [id])
+  groupId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoicesWithTag Invoice? @relation(fields: [invoiceId], references: [id])
+  invoiceId       String?
+  Bill            Bill?    @relation(fields: [billId], references: [id])
+  billId          String?
+
+  @@index([groupId])
+  @@index([storeId])
+  @@index([invoiceId])
+}
+
+model StoreTagGroup {
+  id   String @id @default(cuid())
+  name String
+
+  tags StoreTag[]
+
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+}
+
+model PaymentMethod {
+  id           String   @id @default(cuid())
+  name         String
+  isCreditCard Boolean? @default(false)
+
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  expensesPaidWithThis Expense[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([ownerId])
+  @@index([ownerId, storeId])
+}
+
+model Expense {
+  id              String  @id @default(cuid())
+  referenceNumber String? // maybe an O.R. number
+
+  payee     String // should reference a supplier, customer, or employee Id
+  payeeName String
+
+  expenseItems ExpenseItem[]
+
+  paymentAccount       BookAccountType @relation(fields: [paymentAccountTypeId], references: [id])
+  paymentAccountTypeId String
+
+  paymentDate DateTime
+  amount      Float
+
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  paymentMethodId String?
+
+  memo        String?
+  attachments String[] // file/media urls
+
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([paymentAccountTypeId])
+  @@index([ownerId])
+  @@index([storeId])
+  @@index([ownerId, storeId])
+}
+
+model ExpenseItem {
   id String @id @default(cuid())
 
-  invoice    Invoice @relation(fields: [invoice_id], references: [id])
-  invoice_id String
+  category   BookDetailType @relation(fields: [categoryId], references: [id])
+  categoryId String
 
-  product    Product @relation(fields: [product_id], references: [id])
-  product_id String
+  description String?
+  amount      Float
 
-  quantity Int
+  expense       Expense?     @relation(fields: [expenseId], references: [id])
+  expenseId     String?
+  BookAccount   BookAccount? @relation(fields: [bookAccountId], references: [id])
+  bookAccountId String?
 
-  promo    Promo?  @relation(fields: [promo_id], references: [id])
-  promo_id String?
+  @@index([expenseId])
+}
 
-  sub_total  Float
-  unit_price Float
-  discount   Float?
+model Bill {
+  id         String  @id @default(cuid())
+  billNumber String? // maybe an O.R. number
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  supplier   Supplier @relation(fields: [supplierId], references: [id]) // should reference a supplier
+  supplierId String
+
+  mailingAddress String
+  amount         Float // balance due
+
+  billDate DateTime
+  dueDate  DateTime
+
+  billItems BillItem[]
+  tags      StoreTag[]
+
+  memo        String?
+  attachments String[] // file/media urls
+
+  store   Store  @relation(fields: [storeId], references: [id])
+  storeId String
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([storeId])
+  @@index([ownerId, storeId])
+}
+
+model BillItem {
+  id String @id @default(cuid())
+
+  category   BookDetailType @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  description String?
+  amount      Float
+
+  billId        String?
+  bill          Bill?        @relation(fields: [billId], references: [id])
+  BookAccount   BookAccount? @relation(fields: [bookAccountId], references: [id])
+  bookAccountId String?
+
+  @@index([billId])
 }
