@@ -1,0 +1,206 @@
+[
+  {
+    "name": "Accounts receivable (A/R)",
+    "details": ["Accounts receivable (A/R)"]
+  },
+  {
+    "name": "Current assets",
+    "details": [
+      "Allowance for bad debts",
+      "Assets available for sale",
+      "Development Costs",
+      "Employee Cash Advances",
+      "Inventory",
+      "Investments - Other",
+      "Loans To Officers",
+      "Loans To Others",
+      "Loans to Shareholders",
+      "Other current assets",
+      "Prepaid Expenses",
+      "Retainage",
+      "Undeposited Funds"
+    ]
+  },
+  {
+    "name": "Cash and cash equivalents",
+    "details": [
+      "Bank",
+      "Cash and cash equivalents",
+      "Cash on hand",
+      "Client trust account",
+      "Money Market",
+      "Rents Held in Trust",
+      "Savings"
+    ]
+  },
+  {
+    "name": "Fixed assets",
+    "details": [
+      "Accumulated depletion",
+      "Accumulated depreciation on property, plant and equipment",
+      "Buildings",
+      "Depletable Assets",
+      "Furniture and Fixtures",
+      "Land",
+      "Leasehold Improvements",
+      "Machinery and equipment",
+      "Other fixed assets",
+      "Vehicles"
+    ]
+  },
+  {
+    "name": "Non-current assets",
+    "details": [
+      "Accumulated amortization of non-current assets",
+      "Assets held for sale",
+      "Deferred tax",
+      "Goodwill",
+      "Intangible Assets",
+      "Lease Buyout",
+      "Licences",
+      "Long-term investments",
+      "Organisational Costs",
+      "Other non-current assets",
+      "Security Deposits"
+    ]
+  },
+  {
+    "name": "Accounts Payable (A/P)",
+    "details": ["Accounts Payable (A/P)"]
+  },
+  {
+    "name": "Credit Card",
+    "details": ["Credit Card"]
+  },
+  {
+    "name": "Current liabilities",
+    "details": [
+      "Accrued liabilities",
+      "Client Trust Accounts - Liabilities",
+      "Current Tax Liability",
+      "Current portion of obligations under finance leases",
+      "Dividends payable",
+      "Income tax payable",
+      "Insurance payable",
+      "Line of Credit",
+      "Loan Payable",
+      "Other current liabilities",
+      "Payroll Clearing"
+    ]
+  },
+  {
+    "name": "Non-current liabilities",
+    "details": [
+      "Accrued holiday payable",
+      "Accrued non-current liabilities",
+      "Liabilities related to assets held for sale",
+      "Long-term debt",
+      "Notes Payable",
+      "Other non-current liabilities",
+      "Shareholder Notes Payable"
+    ]
+  },
+  {
+    "name": "Owner's equity",
+    "details": [
+      "Accumulated adjustment",
+      "Dividend disbursed",
+      "Equity in earnings of subsidiaries",
+      "Opening Balance Equity",
+      "Ordinary shares",
+      "Other comprehensive income",
+      "Owner's Equity",
+      "Paid-in capital or surplus",
+      "Partner Contributions",
+      "Partner Distributions",
+      "Partner's Equity",
+      "Preferred shares",
+      "Retained Earnings",
+      "Share capital",
+      "Treasury Shares"
+    ]
+  },
+  {
+    "name": "Income",
+    "details": [
+      "Discounts/Refunds Given",
+      "Non-Profit Income",
+      "Other Primary Income",
+      "Revenue - General",
+      "Sales - retail",
+      "Sales - wholesale",
+      "Sales of Product Income",
+      "Service/Fee Income",
+      "Unapplied Cash Payment Income"
+    ]
+  },
+  {
+    "name": "Other income",
+    "details": [
+      "Dividend income",
+      "Interest earned",
+      "Loss on disposal of assets",
+      "Other Investment Income",
+      "Other Miscellaneous Income",
+      "Other operating income",
+      "Tax-Exempt Interest",
+      "Unrealized loss on securities, net of tax"
+    ]
+  },
+  {
+    "name": "Cost of sales",
+    "details": [
+      "Cost of labor - COS",
+      "Equipment rental - COS",
+      "Freight and delivery - COS",
+      "Other costs of sales - COS",
+      "Supplies and materials - COS"
+    ]
+  },
+  {
+    "name": "Expenses",
+    "details": [
+      "Advertising/Promotional",
+      "Amortization expense",
+      "Auto",
+      "Bad debts",
+      "Bank charges",
+      "Charitable Contributions",
+      "Commissions and fees",
+      "Cost of Labor",
+      "Dues and Subscriptions",
+      "Equipment rental",
+      "Finance costs",
+      "Income tax expense",
+      "Insurance",
+      "Interest paid",
+      "Legal and professional fees",
+      "Loss on discontinued operations, net of tax",
+      "Management compensation",
+      "Meals and entertainment",
+      "Office/General Administrative Expenses",
+      "Other Miscellaneous Service Cost",
+      "Other selling expenses",
+      "Payroll Expenses",
+      "Rent or Lease of Buildings",
+      "Repair and maintenance",
+      "Shipping and delivery expense",
+      "Supplies and materials",
+      "Taxes Paid",
+      "Travel expenses - general and admin expenses",
+      "Travel expenses - selling expense",
+      "Unapplied Cash Bill Payment Expense",
+      "Utilities"
+    ]
+  },
+  {
+    "name": "Other expenses",
+    "details": [
+      "Amortization",
+      "Depreciation",
+      "Exchange Gain or Loss",
+      "Other Expense",
+      "Penalties and settlements"
+    ]
+  }
+]
