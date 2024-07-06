@@ -11,7 +11,7 @@ export function AppNavigation() {
   const segment = useSelectedLayoutSegment()
 
   return (
-    <nav className="grid items-start space-y-1 px-2 text-sm font-medium lg:px-4">
+    <nav className="grid items-start space-y-1 px-2 text-sm lg:px-4">
       {APP_MENU.map((menu) => {
         if (menu.type === "simple")
           return (
