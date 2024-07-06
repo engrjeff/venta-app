@@ -38,6 +38,7 @@ model User {
   expenses            Expense[]
   bills               Bill[]
   bookAccounts        BookAccount[]
+  invoices            Invoice[]
 }
 
 model Account {
@@ -122,7 +123,7 @@ model Store {
   customerFacingAddress Address? @relation(name: "customerFacingAddress", fields: [customerFacingAddressId], references: [id])
   legalAddress          Address? @relation(name: "legalAddress", fields: [legalAddressId], references: [id])
 
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
   productServiceItems ProductServiceItem[]
@@ -219,10 +220,10 @@ model ProductServiceItem {
 
   bundledProducts ProductBundleItem[] @relation(name: "bundledProducts")
 
-  store   Store  @relation(fields: [storeId], references: [id])
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
 
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
   invoices InvoiceItem[]
@@ -251,10 +252,10 @@ model Category {
 
   productServiceItems ProductServiceItem[]
 
-  store   Store  @relation(fields: [storeId], references: [id])
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
 
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
   createdAt DateTime @default(now())
@@ -282,10 +283,10 @@ model BookAccount {
   expenseItemsUnderThisAccount ExpenseItem[]
   billItemsUnderThisAccount    BillItem[]
 
-  store   Store  @relation(fields: [storeId], references: [id])
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
 
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
   createdAt DateTime @default(now())
@@ -297,9 +298,10 @@ model BookAccount {
 }
 
 model BookAccountType {
-  id      String @id @default(cuid())
-  name    String
-  balance Float?
+  id       String   @id @default(cuid())
+  name     String
+  balance  Float?
+  isActive Boolean? @default(true)
 
   bookAccounts BookAccount[]
   detailTypes  BookDetailType[]
@@ -311,9 +313,10 @@ model BookAccountType {
 }
 
 model BookDetailType {
-  id      String @id @default(cuid())
-  name    String
-  balance Float?
+  id       String   @id @default(cuid())
+  name     String
+  balance  Float?
+  isActive Boolean? @default(true)
 
   accountType   BookAccountType @relation(fields: [accountTypeId], references: [id])
   accountTypeId String
@@ -349,10 +352,10 @@ model Supplier {
   address   Address @relation(name: "supplierAddress", fields: [addressId], references: [id])
   addressId String
 
-  store   Store  @relation(fields: [storeId], references: [id])
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
 
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
   createdAt DateTime @default(now())
@@ -386,10 +389,10 @@ model Customer {
   shippingAddress   Address @relation(name: "customerShippingAddress", fields: [shippingAddressId], references: [id])
   shippingAddressId String
 
-  store   Store  @relation(fields: [storeId], references: [id])
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
 
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
   invoices Invoice[]
@@ -437,8 +440,11 @@ model Invoice {
   messageOnInvoice   String?
   messageOnStateMent String?
 
-  store   Store  @relation(fields: [storeId], references: [id])
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
 
   attachments     String[] // file/media urls
   receivingEmails String[] // array of emails
@@ -447,6 +453,8 @@ model Invoice {
   updatedAt DateTime @updatedAt
 
   @@index([storeId])
+  @@index([ownerId])
+  @@index([ownerId, storeId])
 }
 
 model InvoiceItem {
@@ -475,12 +483,14 @@ model StoreTag {
 
   invoicesWithTag Invoice? @relation(fields: [invoiceId], references: [id])
   invoiceId       String?
-  Bill            Bill?    @relation(fields: [billId], references: [id])
-  billId          String?
+
+  billsWithTag Bill?   @relation(fields: [billId], references: [id])
+  billId       String?
 
   @@index([groupId])
   @@index([storeId])
   @@index([invoiceId])
+  @@index([billId])
 }
 
 model StoreTagGroup {
@@ -503,10 +513,10 @@ model PaymentMethod {
   name         String
   isCreditCard Boolean? @default(false)
 
-  store   Store  @relation(fields: [storeId], references: [id])
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
 
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
   expensesPaidWithThis Expense[]
@@ -540,10 +550,10 @@ model Expense {
   memo        String?
   attachments String[] // file/media urls
 
-  store   Store  @relation(fields: [storeId], references: [id])
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
 
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
   createdAt DateTime @default(now())
@@ -564,9 +574,10 @@ model ExpenseItem {
   description String?
   amount      Float
 
-  expense       Expense?     @relation(fields: [expenseId], references: [id])
-  expenseId     String?
-  BookAccount   BookAccount? @relation(fields: [bookAccountId], references: [id])
+  expense   Expense? @relation(fields: [expenseId], references: [id])
+  expenseId String?
+
+  bookAccount   BookAccount? @relation(fields: [bookAccountId], references: [id])
   bookAccountId String?
 
   @@index([expenseId])
@@ -591,10 +602,10 @@ model Bill {
   memo        String?
   attachments String[] // file/media urls
 
-  store   Store  @relation(fields: [storeId], references: [id])
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
 
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
   createdAt DateTime @default(now())
@@ -614,9 +625,10 @@ model BillItem {
   description String?
   amount      Float
 
-  billId        String?
-  bill          Bill?        @relation(fields: [billId], references: [id])
-  BookAccount   BookAccount? @relation(fields: [bookAccountId], references: [id])
+  billId String?
+  bill   Bill?   @relation(fields: [billId], references: [id])
+
+  bookAccount   BookAccount? @relation(fields: [bookAccountId], references: [id])
   bookAccountId String?
 
   @@index([billId])
