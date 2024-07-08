@@ -13,11 +13,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         where: {
           email: token.email!,
         },
+        include: {
+          stores: { select: { id: true } },
+        },
       })
 
       if (dbUser) {
         token.id = dbUser.id
         token.role = dbUser.role
+        token.onboarded = dbUser.stores.length > 0
       }
       return token
     },
@@ -28,6 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.email = token.email
         session.user.image = token.picture
         session.user.role = token.role
+        session.user.onboarded = token.onboarded
       }
       return session
     },

@@ -8,6 +8,7 @@ declare module "next-auth/jwt" {
     id: string
     role: ROLE
     email: string
+    onboarded: boolean
   }
 }
 
@@ -16,6 +17,7 @@ declare module "next-auth" {
     user: {
       id: string
       role: ROLE
+      onboarded: boolean
     } & DefaultSession["user"]
   }
 
