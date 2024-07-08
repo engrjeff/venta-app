@@ -33,7 +33,7 @@ export function LoginForm() {
           <PasswordInput name="password" id="password" />
         </div>
         {logInAction.isError ? (
-          <FormError error="Invalid credentials." />
+          <FormError error={logInAction.error.message} />
         ) : null}
         <div className="pt-6">
           <Button className="w-full">

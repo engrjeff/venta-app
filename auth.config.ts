@@ -1,3 +1,4 @@
+import { AccessDenied, CredentialsSignin } from "@auth/core/errors" // import is specific to your framework
 import bcrypt from "bcryptjs"
 import type { NextAuthConfig } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
@@ -24,7 +25,7 @@ export default {
 
         const foundUser = await prisma.user.findUnique({ where: { email } })
 
-        if (!foundUser) throw new Error("No account found")
+        if (!foundUser) throw new AccessDenied("Invalid credentials.")
 
         if (!foundUser.emailVerified) {
           const existingVerificationToken = await getVerificationTokenByEmail(
@@ -41,13 +42,13 @@ export default {
               //     newToken.token
               //   );
 
-              throw new Error(
-                "A confirmation link was sent to your email. Please verify your email first"
+              throw new CredentialsSignin(
+                "A confirmation link was sent to your email. Please verify your email first."
               )
             }
           }
 
-          throw new Error("Please verify your email first")
+          throw new CredentialsSignin("Please verify your email first.")
         }
 
         const passwordsMatch = await bcrypt.compare(
@@ -55,7 +56,7 @@ export default {
           foundUser.hashedPassword!
         )
 
-        if (!passwordsMatch) throw new Error("No account found")
+        if (!passwordsMatch) throw new AccessDenied("Invalid credentials.")
 
         const { name, email: userEmail, id, image, role } = foundUser
 
