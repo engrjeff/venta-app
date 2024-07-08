@@ -1,6 +1,8 @@
-import { CircleUser } from "lucide-react";
+"use client"
 
-import { Button } from "@/components/ui/button";
+import { Session } from "next-auth"
+
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,27 +10,41 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
+import { SignoutDialog } from "@/app/(auth)/components/SignoutDialog"
 
-function UserMenu() {
+import { Avatar, AvatarFallback } from "../ui/avatar"
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((s) => s.charAt(0))
+    .join("")
+}
+
+function UserMenu({ user }: { user?: Session["user"] }) {
+  if (!user) return null
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="secondary" size="icon" className="rounded-full">
-          <CircleUser className="size-5" />
+          <Avatar>
+            <AvatarFallback>{getInitials(user.name!)}</AvatarFallback>
+          </Avatar>
           <span className="sr-only">Toggle user menu</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>Settings</DropdownMenuItem>
         <DropdownMenuItem>Support</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Logout</DropdownMenuItem>
+        <SignoutDialog />
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }
 
-export default UserMenu;
+export default UserMenu

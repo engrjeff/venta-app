@@ -1,8 +1,10 @@
 import type { Metadata } from "next"
 
+import { AuthFooter } from "./components/AuthFooter"
+
 export const metadata: Metadata = {
-  title: "Dei POS",
-  description: "Dei POS App",
+  title: "Venta",
+  description: "Venta App",
 }
 
 export default function AuthLayout({
@@ -11,10 +13,11 @@ export default function AuthLayout({
   children: React.ReactNode
 }>) {
   return (
-    <div>
-      <header>Header</header>
-      <main>{children}</main>
-      <footer>Footer</footer>
+    <div className="flex min-h-screen flex-col">
+      <main className="flex flex-1 items-center justify-center">
+        {children}
+      </main>
+      <AuthFooter />
     </div>
   )
 }
