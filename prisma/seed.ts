@@ -44,7 +44,7 @@ async function main() {
   console.log(`Generated user: `, user.email)
 
   // generate store
-  const store = await prisma.store.create({
+  const storeA = await prisma.store.create({
     data: {
       name: "CoFaith",
       slug: "cofaith",
@@ -55,7 +55,18 @@ async function main() {
     },
   })
 
-  console.log(`Generated store: `, store.name)
+  const storeB = await prisma.store.create({
+    data: {
+      name: "Epistle Creatives Co.",
+      slug: "epistle-creatives-co",
+      email: "epistlce@gmail.com",
+      legalName: "Epistle Creatives Co.",
+      logo: "/epistle-logo.png",
+      ownerId: user.id,
+    },
+  })
+
+  console.log(`Generated stores: `, storeA.name, storeB.name)
 
   // generate book accounts
   // for each book account, generate detail account
@@ -82,16 +93,31 @@ async function main() {
     bookAccountTypes.length
   )
 
+  const defaultPaymentMethods = [
+    "Cash",
+    "GCash",
+    "Check",
+    "Credit Card",
+    "Direct Debit",
+  ]
+
   // generate default payment methods for expenses
   const paymentMethods = await prisma.paymentMethod.createMany({
-    data: ["Cash", "GCash", "Check", "Credit Card", "Direct Debit"].map(
-      (method) => ({
-        name: method,
-        isCreditCard: method === "Credit Card",
-        ownerId: user.id,
-        storeId: store.id,
-      })
-    ),
+    data: defaultPaymentMethods.map((method) => ({
+      name: method,
+      isCreditCard: method === "Credit Card",
+      ownerId: user.id,
+      storeId: storeA.id,
+    })),
+  })
+
+  const paymentMethodsB = await prisma.paymentMethod.createMany({
+    data: defaultPaymentMethods.map((method) => ({
+      name: method,
+      isCreditCard: method === "Credit Card",
+      ownerId: user.id,
+      storeId: storeB.id,
+    })),
   })
 
   console.log(`Generated Payment Methods: `, paymentMethods.count)
