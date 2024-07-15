@@ -1,3 +1,7 @@
+"use client"
+
+import Link from "next/link"
+import { useParams } from "next/navigation"
 import { ChevronDownIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -11,6 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function MoreDropDown() {
+  const { storeId } = useParams<{ storeId: string }>()
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -21,7 +27,16 @@ export function MoreDropDown() {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Manage Categories</DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/${storeId}/categories`} className="">
+            Manage Categories
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/${storeId}/units`} className="">
+            Manage Units
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem disabled>Run Report</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

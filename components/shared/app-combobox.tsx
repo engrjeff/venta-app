@@ -19,29 +19,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-]
-
 interface OptionItem {
   value: string
   label: string
@@ -54,6 +31,9 @@ interface AppComboboxProps {
   value?: string
   onValueChange: (val: string | undefined) => void
   renderEmpty?: (search: string) => React.ReactNode
+
+  disabled?: boolean
+  fullwidth?: boolean
 }
 
 export function AppCombobox({
@@ -63,6 +43,8 @@ export function AppCombobox({
   value,
   onValueChange,
   renderEmpty,
+  disabled,
+  fullwidth,
 }: AppComboboxProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -76,6 +58,7 @@ export function AppCombobox({
           role="combobox"
           aria-expanded={open}
           className="w-full flex-1 justify-between"
+          disabled={disabled}
         >
           {value
             ? options.find((option) => option.value === value)?.label
@@ -85,7 +68,10 @@ export function AppCombobox({
       </PopoverTrigger>
       <PopoverContent
         className="w-full p-0"
-        style={{ width: "var(--radix-popover-trigger-width)" }}
+        align="start"
+        style={{
+          width: fullwidth ? "var(--radix-popover-trigger-width)" : "100%",
+        }}
       >
         <Command>
           <CommandInput
@@ -93,14 +79,12 @@ export function AppCombobox({
             onValueChange={setSearch}
             placeholder={inputPlaceholder}
             className="h-9"
+            autoFocus={false}
           />
+          <CommandEmpty className={cn(renderEmpty ? "p-1" : "")}>
+            {renderEmpty ? <>{renderEmpty(search)}</> : "No item found"}
+          </CommandEmpty>
           <CommandList>
-            {renderEmpty ? (
-              <div className="px-1 pt-2">{renderEmpty(search)}</div>
-            ) : (
-              <CommandEmpty>No item found.</CommandEmpty>
-            )}
-
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem

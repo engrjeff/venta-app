@@ -1,5 +1,6 @@
 "use client"
 
+import { ProductCreateInput } from "@/schema/product"
 import { ChevronDownIcon } from "lucide-react"
 import { useForm } from "react-hook-form"
 
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/form"
 import { ImagePicker } from "@/components/ui/image-picker"
 import { Input } from "@/components/ui/input"
+import { NumberInput } from "@/components/ui/number-input"
 import {
   Popover,
   PopoverContent,
@@ -33,14 +35,23 @@ import { AppCombobox } from "@/components/shared/app-combobox"
 import { ExpenseAccountForm } from "../account-types/ExpenseAccountForm"
 import { IncomeAccountForm } from "../account-types/IncomeAccountForm"
 import { InventoryAssetAccountForm } from "../account-types/InventoryAssetAccountForm"
-import { NewCategoryForm } from "./new-category-form"
-import { NewSupplierForm } from "./new-supplier-form"
-import { NewUnitForm } from "./new-unit-form"
+import { CategorySelect } from "./category-select"
+import { SupplierSelect } from "./supplier-select"
+import { UnitSelect } from "./unit-select"
 
 export function InventoryTypeForm() {
-  const form = useForm()
+  const form = useForm<ProductCreateInput>({
+    defaultValues: {
+      initialQuantity: 0,
+      reorderPoint: 0,
+      cost: 0,
+      salesPriceOrRate: 0,
+    },
+  })
 
-  function onSubmit() {}
+  function onSubmit(values: ProductCreateInput) {
+    console.log(values)
+  }
 
   return (
     <Form {...form}>
@@ -106,23 +117,14 @@ export function InventoryTypeForm() {
           </div>
           <FormField
             control={form.control}
-            name="category"
+            name="categoryId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category</FormLabel>
                 <FormControl>
-                  <AppCombobox
-                    label="Select category"
+                  <CategorySelect
                     value={field.value}
                     onValueChange={field.onChange}
-                    options={[
-                      { value: "cat1", label: "Category 1" },
-                      { value: "cat2", label: "Category 2" },
-                      { value: "cat3", label: "Category 3" },
-                    ]}
-                    renderEmpty={(search) => (
-                      <NewCategoryForm initialValue={search} />
-                    )}
                   />
                 </FormControl>
                 <FormDescription>
@@ -142,31 +144,22 @@ export function InventoryTypeForm() {
                     Initial Quantity on hand <span>*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="0" {...field} />
+                    <NumberInput {...field} placeholder="0" min={0} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
-              name="unit"
+              name="unitId"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Unit</FormLabel>
                   <FormControl>
-                    <AppCombobox
-                      label="Unit"
+                    <UnitSelect
                       value={field.value}
                       onValueChange={field.onChange}
-                      options={[
-                        { value: "kg", label: "kg" },
-                        { value: "ml", label: "ml" },
-                        { value: "pc", label: "pc" },
-                      ]}
-                      renderEmpty={(search) => (
-                        <NewUnitForm initialValue={search} />
-                      )}
                     />
                   </FormControl>
                   <FormMessage />
@@ -174,7 +167,7 @@ export function InventoryTypeForm() {
               )}
             />
             <FormField
-              name="as_of_date"
+              name="asOfDate"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -205,18 +198,13 @@ export function InventoryTypeForm() {
               )}
             />
             <FormField
-              name="reorder_point"
+              name="reorderPoint"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Reorder Point</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      inputMode="numeric"
-                      {...field}
-                    />
+                    <NumberInput {...field} min={0} />
                   </FormControl>
                   <Popover>
                     <PopoverTrigger>
@@ -242,7 +230,7 @@ export function InventoryTypeForm() {
           <Separator />
           <FormField
             control={form.control}
-            name="inventory_asset_account"
+            name="inventoryAssetAccountId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Inventory Asset Account</FormLabel>
@@ -286,13 +274,13 @@ export function InventoryTypeForm() {
           />
           <div className="grid grid-cols-2 gap-4">
             <FormField
-              name="sales_price_rate"
+              name="salesPriceOrRate"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sales price/rate</FormLabel>
                   <FormControl>
-                    <Input placeholder="100" type="number" {...field} />
+                    <NumberInput placeholder="100" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -300,7 +288,7 @@ export function InventoryTypeForm() {
             />
             <FormField
               control={form.control}
-              name="inventory_asset_account"
+              name="incomeAccountId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Income Account</FormLabel>
@@ -324,7 +312,7 @@ export function InventoryTypeForm() {
           </div>
           <Separator />
           <FormField
-            name="purchasing_description"
+            name="purchasingDescription"
             control={form.control}
             render={({ field }) => (
               <FormItem>
@@ -348,7 +336,7 @@ export function InventoryTypeForm() {
                 <FormItem>
                   <FormLabel>Cost</FormLabel>
                   <FormControl>
-                    <Input placeholder="100" type="number" {...field} />
+                    <NumberInput placeholder="100" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -356,7 +344,7 @@ export function InventoryTypeForm() {
             />
             <FormField
               control={form.control}
-              name="expense_account"
+              name="expenseAccountId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Expense Account</FormLabel>
@@ -376,24 +364,15 @@ export function InventoryTypeForm() {
               )}
             />
             <FormField
-              name="preferred_supplier"
+              name="supplierId"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Preferred Supplier</FormLabel>
                   <FormControl>
-                    <AppCombobox
-                      label="Preferred supplier"
+                    <SupplierSelect
                       value={field.value}
                       onValueChange={field.onChange}
-                      options={[
-                        { value: "1", label: "Supplier 1" },
-                        { value: "2", label: "Supplier 2" },
-                        { value: "3", label: "Supplier 3" },
-                      ]}
-                      renderEmpty={(search) => (
-                        <NewSupplierForm initialValue={search} />
-                      )}
                     />
                   </FormControl>
                   <FormMessage />

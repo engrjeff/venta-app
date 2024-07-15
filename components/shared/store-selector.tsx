@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { notFound, useSelectedLayoutSegment } from "next/navigation"
+import { notFound, useParams, usePathname } from "next/navigation"
 import { Store } from "@prisma/client"
 import { ChevronDownIcon } from "lucide-react"
 
@@ -17,11 +17,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function StoreSelector({ stores }: { stores: Store[] }) {
-  const segment = useSelectedLayoutSegment()
+  const { storeId } = useParams<{ storeId: string }>()
 
-  const currentStore = stores.find((s) => s.slug === segment)
+  const pathname = usePathname()
+
+  const currentStore = stores.find((s) => s.slug === storeId)
 
   if (!currentStore) return notFound()
+
+  const path = pathname.split("/").filter(Boolean)
 
   return (
     <DropdownMenu>
@@ -43,7 +47,7 @@ export function StoreSelector({ stores }: { stores: Store[] }) {
         <DropdownMenuSeparator />
         {stores.map((store) => (
           <DropdownMenuItem key={store.id} asChild>
-            <Link href={`/${store.slug}/dashboard`}>
+            <Link href={`/${store.slug}/${path.at(path.length - 1)}`}>
               <Avatar className="mr-3 size-7">
                 <AvatarImage src={store?.logo} alt={store?.name} />
                 <AvatarFallback>CF</AvatarFallback>

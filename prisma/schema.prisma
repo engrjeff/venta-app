@@ -39,6 +39,8 @@ model User {
   bills               Bill[]
   bookAccounts        BookAccount[]
   invoices            Invoice[]
+  Unit                Unit[]
+  UnitConversion      UnitConversion[]
 }
 
 model Account {
@@ -138,6 +140,9 @@ model Store {
   bills               Bill[]
   bookAccounts        BookAccount[]
 
+  units           Unit[]
+  unitConversions UnitConversion[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -195,6 +200,9 @@ model ProductServiceItem {
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String
 
+  unit   Unit   @relation(fields: [unitId], references: [id])
+  unitId String
+
   image String?
 
   initialQuantity  Int? // only if type = INVENTORY
@@ -211,6 +219,9 @@ model ProductServiceItem {
 
   purchasingDescription String?
   cost                  Float?
+
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+  supplierId String
 
   expenseAccount   BookAccount @relation(name: "expenseAccount", fields: [expenseAccountId], references: [id])
   expenseAccountId String
@@ -243,6 +254,55 @@ model ProductBundleItem {
   productId String
 
   @@index([productId])
+}
+
+model Unit {
+  id String @id @default(cuid())
+
+  name String
+
+  conversions UnitConversion[]
+
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
+
+  productServiceItems ProductServiceItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([ownerId])
+  @@index([ownerId, storeId])
+}
+
+model UnitConversion {
+  id String @id @default(cuid())
+
+  from String
+  to   String
+
+  factor Float
+
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
+
+  unit   Unit?   @relation(fields: [unitId], references: [id])
+  unitId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([unitId])
+  @@index([storeId])
+  @@index([ownerId])
+  @@index([ownerId, storeId])
 }
 
 model Category {
@@ -349,14 +409,16 @@ model Supplier {
 
   billsPaidToThis Bill[]
 
-  address   Address @relation(name: "supplierAddress", fields: [addressId], references: [id])
-  addressId String
+  address   Address? @relation(name: "supplierAddress", fields: [addressId], references: [id])
+  addressId String?
 
   store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
 
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
+
+  productServiceItems ProductServiceItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

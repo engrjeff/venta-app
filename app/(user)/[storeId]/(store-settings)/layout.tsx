@@ -2,7 +2,7 @@ import { type ReactNode } from "react"
 
 import { TabLink } from "@/components/shared/tab-link"
 
-function SalesPagesLayout({
+function StoreSettingsPagesLayout({
   children,
   params: { storeId },
 }: {
@@ -12,20 +12,21 @@ function SalesPagesLayout({
   return (
     <div className="rounded-lg border bg-background">
       <div className="p-4">
-        <h1 className="text-2xl font-bold">Sales</h1>
+        <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-sm text-muted-foreground">
-          Manage sales, invoices, customers, and products & services.
+          Manage categories, product units, chart of accounts.
         </p>
       </div>
       <div className="border-b px-0">
-        <TabLink href={`/${storeId}/sales`}>All Sales</TabLink>
-        <TabLink href={`/${storeId}/invoices`}>Invoices</TabLink>
-        <TabLink href={`/${storeId}/customers`}>Customers</TabLink>
-        <TabLink href={`/${storeId}/items`}>Products & Services</TabLink>
+        <TabLink href={`/${storeId}/categories`}>Categories</TabLink>
+        <TabLink href={`/${storeId}/units`}>Units</TabLink>
+        <TabLink href={`/${storeId}/chart-of-accounts`}>
+          Chart of Accounts
+        </TabLink>
       </div>
       <div className="p-4">{children}</div>
     </div>
   )
 }
 
-export default SalesPagesLayout
+export default StoreSettingsPagesLayout

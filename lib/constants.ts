@@ -1,9 +1,17 @@
 import {
+  FileBarChart,
+  FileCog,
   Home,
+  LibraryBig,
   LineChart,
   ListTodo,
   Package,
+  PencilRuler,
   Receipt,
+  ReceiptText,
+  ShoppingBag,
+  TicketMinus,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react"
 
@@ -53,17 +61,39 @@ export const APP_MENU: AppMenuItem[] = [
       {
         label: "Invoices",
         href: "/invoices",
-        Icon: Home,
+        Icon: ReceiptText,
       },
       {
         label: "Customers",
         href: "/customers",
-        Icon: Home,
+        Icon: UsersRound,
       },
       {
         label: "Products & Services",
         href: "/items",
         Icon: Package,
+      },
+    ],
+  },
+  {
+    label: "Store Settings",
+    Icon: FileCog,
+    type: "nested",
+    subItems: [
+      {
+        label: "Categories",
+        href: "/categories",
+        Icon: LibraryBig,
+      },
+      {
+        label: "Units",
+        href: "/units",
+        Icon: PencilRuler,
+      },
+      {
+        label: "Chart of Accounts",
+        href: "/chart-of-accounts",
+        Icon: FileBarChart,
       },
     ],
   },
@@ -75,19 +105,26 @@ export const APP_MENU: AppMenuItem[] = [
       {
         label: "Expenses",
         href: "/expenses",
-        Icon: Package,
+        Icon: TicketMinus,
       },
       {
         label: "Suppliers",
         href: "/suppliers",
-        Icon: Package,
+        Icon: ShoppingBag,
       },
     ],
   },
+
   {
     label: "Reports",
-    href: "/reports",
     Icon: LineChart,
-    type: "simple",
+    type: "nested",
+    subItems: [
+      {
+        label: "Reports",
+        href: "/reports",
+        Icon: LineChart,
+      },
+    ],
   },
 ]
