@@ -190,9 +190,10 @@ enum ProductServiceType {
 }
 
 model ProductServiceItem {
-  id   String  @id @default(cuid())
+  id   String             @id @default(cuid())
   name String
   sku  String?
+  type ProductServiceType @default(INVENTORY)
 
   status      ProductServiceStatus      @default(ACTIVE)
   stockStatus ProductServiceStockStatus @default(IN_STOCK)

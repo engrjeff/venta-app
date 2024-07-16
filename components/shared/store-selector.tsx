@@ -32,17 +32,17 @@ export function StoreSelector({ stores }: { stores: Store[] }) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="h-auto w-full justify-start rounded-full px-2 py-1"
+          className="h-auto justify-start rounded-full px-2"
         >
-          <Avatar className="mr-3 size-7">
+          <Avatar className="mr-3 size-6">
             <AvatarImage src={currentStore?.logo} alt={currentStore?.name} />
             <AvatarFallback>CF</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium">{currentStore?.name}</span>
-          <ChevronDownIcon className="ml-auto size-4" />
+          <span className="text-xs font-medium">{currentStore?.name}</span>
+          <ChevronDownIcon className="ml-1 size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-trigger-width">
+      <DropdownMenuContent align="start" className="min-w-52">
         <DropdownMenuLabel>Stores</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {stores.map((store) => (
@@ -52,7 +52,7 @@ export function StoreSelector({ stores }: { stores: Store[] }) {
                 <AvatarImage src={store?.logo} alt={store?.name} />
                 <AvatarFallback>CF</AvatarFallback>
               </Avatar>
-              {store.name}
+              <span className="text-nowrap">{store.name}</span>
             </Link>
           </DropdownMenuItem>
         ))}

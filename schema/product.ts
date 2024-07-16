@@ -43,7 +43,9 @@ export const inventoryCreateSchema = productCreateSchema.extend({
     .positive({ message: "Must be greater than 0" })
     .optional(),
 
-  asOfDate: z.string().optional(),
+  asOfDate: z
+    .string({ required_error: "Required." })
+    .min(10, { message: "Required." }),
 
   reorderPoint: z
     .number()

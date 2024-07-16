@@ -7,7 +7,7 @@ export function QuickNewButton() {
     <Button
       size="icon"
       variant="secondary"
-      className="size-6 shrink-0 rounded-full"
+      className="ml-auto size-6 shrink-0 rounded-full"
     >
       <PlusIcon className="size-3" /> <span className="sr-only">New</span>
     </Button>
