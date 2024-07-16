@@ -3,11 +3,11 @@ import { PrismaClient } from "@prisma/client"
 const prisma = new PrismaClient()
 
 async function main() {
-  await prisma.bookDetailType.deleteMany()
-  await prisma.bookAccountType.deleteMany()
-  await prisma.paymentMethod.deleteMany()
   await prisma.store.deleteMany()
   await prisma.user.deleteMany()
+  await prisma.bookAccount.deleteMany()
+  await prisma.bookDetailType.deleteMany()
+  await prisma.bookAccountType.deleteMany()
 
   console.log(`DB purge success!`)
 }

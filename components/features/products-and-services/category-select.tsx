@@ -9,7 +9,7 @@ export function CategorySelect({
   value,
   onValueChange,
 }: {
-  value: string
+  value?: string
   onValueChange: (val?: string) => void
 }) {
   const { data, isLoading } = useCategories()

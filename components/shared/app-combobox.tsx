@@ -57,7 +57,7 @@ export function AppCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full flex-1 justify-between"
+          className="w-full flex-1 justify-between font-normal"
           disabled={disabled}
         >
           {value
@@ -81,7 +81,11 @@ export function AppCombobox({
             className="h-9"
             autoFocus={false}
           />
-          <CommandEmpty className={cn(renderEmpty ? "p-1" : "")}>
+          <CommandEmpty
+            className={cn(
+              renderEmpty ? "p-2 pb-0" : "py-6 text-center text-sm"
+            )}
+          >
             {renderEmpty ? <>{renderEmpty(search)}</> : "No item found"}
           </CommandEmpty>
           <CommandList>

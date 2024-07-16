@@ -32,7 +32,7 @@ export function StoreSelector({ stores }: { stores: Store[] }) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="h-auto w-full justify-start px-2 py-1"
+          className="h-auto w-full justify-start rounded-full px-2 py-1"
         >
           <Avatar className="mr-3 size-7">
             <AvatarImage src={currentStore?.logo} alt={currentStore?.name} />

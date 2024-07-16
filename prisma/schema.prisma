@@ -197,11 +197,11 @@ model ProductServiceItem {
   status      ProductServiceStatus      @default(ACTIVE)
   stockStatus ProductServiceStockStatus @default(IN_STOCK)
 
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId String
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
 
-  unit   Unit   @relation(fields: [unitId], references: [id])
-  unitId String
+  unit   Unit?   @relation(fields: [unitId], references: [id])
+  unitId String?
 
   image String?
 
@@ -211,20 +211,20 @@ model ProductServiceItem {
   description      String?
   salesPriceOrRate Float?
 
-  inventoryAssetAccount   BookAccount @relation(name: "inventoryAssetAccount", fields: [inventoryAssetAccountId], references: [id])
-  inventoryAssetAccountId String
+  inventoryAssetAccount   BookAccount? @relation(name: "inventoryAssetAccount", fields: [inventoryAssetAccountId], references: [id])
+  inventoryAssetAccountId String?
 
-  incomeAccount   BookAccount @relation(name: "incomeAccount", fields: [incomeAccountId], references: [id])
-  incomeAccountId String
+  incomeAccount   BookAccount? @relation(name: "incomeAccount", fields: [incomeAccountId], references: [id])
+  incomeAccountId String?
 
   purchasingDescription String?
   cost                  Float?
 
-  supplier   Supplier @relation(fields: [supplierId], references: [id])
-  supplierId String
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  supplierId String?
 
-  expenseAccount   BookAccount @relation(name: "expenseAccount", fields: [expenseAccountId], references: [id])
-  expenseAccountId String
+  expenseAccount   BookAccount? @relation(name: "expenseAccount", fields: [expenseAccountId], references: [id])
+  expenseAccountId String?
 
   isSelling    Boolean? @default(true)
   isPurchasing Boolean? @default(true)
@@ -242,6 +242,7 @@ model ProductServiceItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([storeId, name])
   @@index([storeId])
   @@index([ownerId])
   @@index([ownerId, storeId])
@@ -321,13 +322,25 @@ model Category {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([storeId, name])
   @@index([storeId])
   @@index([ownerId])
   @@index([ownerId, storeId])
 }
 
+enum BookAccountLabel {
+  UNCATEGORIZED
+  ASSET
+  INVENTORY
+  INCOME
+  EXPENSE
+  BILL
+}
+
 model BookAccount {
-  id          String  @id @default(cuid())
+  id          String           @id @default(cuid())
+  name        String
+  label       BookAccountLabel @default(UNCATEGORIZED)
   description String?
 
   accountType   BookAccountType @relation(fields: [accountTypeId], references: [id])
@@ -352,9 +365,12 @@ model BookAccount {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([storeId, name])
   @@index([ownerId])
   @@index([storeId])
   @@index([ownerId, storeId])
+  @@index([name])
+  @@index([label])
 }
 
 model BookAccountType {

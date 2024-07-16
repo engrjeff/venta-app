@@ -9,7 +9,7 @@ export function SupplierSelect({
   value,
   onValueChange,
 }: {
-  value: string
+  value?: string
   onValueChange: (val?: string) => void
 }) {
   const { data, isLoading } = useSuppliers()

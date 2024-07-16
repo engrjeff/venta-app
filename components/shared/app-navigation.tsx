@@ -11,7 +11,7 @@ export function AppNavigation() {
 
   return (
     <nav className="grid items-start space-y-1 px-2 text-sm lg:px-4">
-      <span className="inline-block py-2 text-[10px] uppercase text-muted-foreground">
+      <span className="inline-block px-3 py-2 text-[10px] uppercase text-muted-foreground">
         Menu
       </span>
 
@@ -29,7 +29,7 @@ export function AppNavigation() {
 
         return (
           <div key={`app-menu-${menu.label}`}>
-            <span className="inline-block py-1.5 text-[10px] uppercase text-muted-foreground">
+            <span className="inline-block px-3 py-1.5 text-[10px] uppercase text-muted-foreground">
               {menu.label}
             </span>
             {menu.subItems.map((submenu) => (

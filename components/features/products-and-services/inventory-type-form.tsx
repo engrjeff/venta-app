@@ -1,9 +1,15 @@
 "use client"
 
-import { ProductCreateInput } from "@/schema/product"
+import { createInventoryProduct } from "@/actions/products"
+import { InventoryCreateInput, inventoryCreateSchema } from "@/schema/product"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { format } from "date-fns"
 import { ChevronDownIcon } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { FieldErrors, useForm } from "react-hook-form"
+import { toast } from "sonner"
+import { useServerAction } from "zsa-react"
 
+import { useCurrentStore } from "@/hooks/useCurrentStore"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -30,32 +36,55 @@ import {
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
-import { AppCombobox } from "@/components/shared/app-combobox"
 
-import { ExpenseAccountForm } from "../account-types/ExpenseAccountForm"
-import { IncomeAccountForm } from "../account-types/IncomeAccountForm"
-import { InventoryAssetAccountForm } from "../account-types/InventoryAssetAccountForm"
+import { BookAccountsSelect } from "./book-accounts-select"
 import { CategorySelect } from "./category-select"
 import { SupplierSelect } from "./supplier-select"
 import { UnitSelect } from "./unit-select"
 
 export function InventoryTypeForm() {
-  const form = useForm<ProductCreateInput>({
+  const store = useCurrentStore()
+
+  const form = useForm<InventoryCreateInput>({
+    resolver: zodResolver(inventoryCreateSchema),
     defaultValues: {
       initialQuantity: 0,
       reorderPoint: 0,
+      name: "",
+      sku: "",
       cost: 0,
       salesPriceOrRate: 0,
+      asOfDate: "",
     },
   })
 
-  function onSubmit(values: ProductCreateInput) {
-    console.log(values)
+  const createAction = useServerAction(createInventoryProduct)
+
+  function onError(errors: FieldErrors<InventoryCreateInput>) {
+    console.log(errors)
+  }
+
+  async function onSubmit({ image, ...values }: InventoryCreateInput) {
+    try {
+      if (!store.data?.id) return
+
+      const [data, err] = await createAction.execute({
+        storeId: store.data.id,
+        ...values,
+      })
+
+      if (err) {
+        toast.error(err.message)
+        return
+      }
+
+      toast.success(`${data?.name} was saved!`)
+    } catch (error) {}
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmit, onError)}>
         <fieldset className="space-y-3 p-4">
           <div className="flex justify-between gap-8">
             <div className="flex-1 space-y-3">
@@ -107,7 +136,10 @@ export function InventoryTypeForm() {
                   <FormItem>
                     <FormLabel>Image</FormLabel>
                     <FormControl>
-                      <ImagePicker />
+                      <ImagePicker
+                        urlValue={field.value}
+                        onValueChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -144,7 +176,13 @@ export function InventoryTypeForm() {
                     Initial Quantity on hand <span>*</span>
                   </FormLabel>
                   <FormControl>
-                    <NumberInput {...field} placeholder="0" min={0} />
+                    <NumberInput
+                      placeholder="0"
+                      min={0}
+                      {...form.register("initialQuantity", {
+                        valueAsNumber: true,
+                      })}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -175,7 +213,11 @@ export function InventoryTypeForm() {
                     As of Date <span>*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input
+                      type="date"
+                      {...field}
+                      max={format(new Date(), "yyyy-MM-dd")}
+                    />
                   </FormControl>
                   <Popover>
                     <PopoverTrigger>
@@ -204,7 +246,13 @@ export function InventoryTypeForm() {
                 <FormItem>
                   <FormLabel>Reorder Point</FormLabel>
                   <FormControl>
-                    <NumberInput {...field} min={0} />
+                    <NumberInput
+                      placeholder="0"
+                      min={0}
+                      {...form.register("reorderPoint", {
+                        valueAsNumber: true,
+                      })}
+                    />
                   </FormControl>
                   <Popover>
                     <PopoverTrigger>
@@ -235,17 +283,10 @@ export function InventoryTypeForm() {
               <FormItem>
                 <FormLabel>Inventory Asset Account</FormLabel>
                 <FormControl>
-                  <AppCombobox
-                    label="Choose Inventory Asset"
+                  <BookAccountsSelect
+                    accountLabel="INVENTORY"
                     value={field.value}
                     onValueChange={field.onChange}
-                    options={[
-                      { value: "inventory", label: "Inventory" },
-                      { value: "inventory_asset", label: "Inventory Asset" },
-                    ]}
-                    renderEmpty={(search) => (
-                      <InventoryAssetAccountForm initialNameValue={search} />
-                    )}
                   />
                 </FormControl>
                 <FormMessage />
@@ -258,9 +299,7 @@ export function InventoryTypeForm() {
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Description <span>*</span>
-                </FormLabel>
+                <FormLabel>Description</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Description on sales form"
@@ -280,7 +319,13 @@ export function InventoryTypeForm() {
                 <FormItem>
                   <FormLabel>Sales price/rate</FormLabel>
                   <FormControl>
-                    <NumberInput placeholder="100" {...field} />
+                    <NumberInput
+                      placeholder="0"
+                      min={0}
+                      {...form.register("salesPriceOrRate", {
+                        valueAsNumber: true,
+                      })}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -293,16 +338,10 @@ export function InventoryTypeForm() {
                 <FormItem>
                   <FormLabel>Income Account</FormLabel>
                   <FormControl>
-                    <AppCombobox
-                      label="Income Account"
+                    <BookAccountsSelect
+                      accountLabel="INCOME"
                       value={field.value}
                       onValueChange={field.onChange}
-                      options={[
-                        { value: "1", label: "Sales of Product Income" },
-                      ]}
-                      renderEmpty={(search) => (
-                        <IncomeAccountForm initialNameValue={search} />
-                      )}
                     />
                   </FormControl>
                   <FormMessage />
@@ -336,7 +375,13 @@ export function InventoryTypeForm() {
                 <FormItem>
                   <FormLabel>Cost</FormLabel>
                   <FormControl>
-                    <NumberInput placeholder="100" {...field} />
+                    <NumberInput
+                      placeholder="0"
+                      min={0}
+                      {...form.register("cost", {
+                        valueAsNumber: true,
+                      })}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -349,14 +394,10 @@ export function InventoryTypeForm() {
                 <FormItem>
                   <FormLabel>Expense Account</FormLabel>
                   <FormControl>
-                    <AppCombobox
-                      label="Expense Account"
+                    <BookAccountsSelect
+                      accountLabel="EXPENSE"
                       value={field.value}
                       onValueChange={field.onChange}
-                      options={[{ value: "1", label: "Cost of sales" }]}
-                      renderEmpty={(search) => (
-                        <ExpenseAccountForm initialNameValue={search} />
-                      )}
                     />
                   </FormControl>
                   <FormMessage />

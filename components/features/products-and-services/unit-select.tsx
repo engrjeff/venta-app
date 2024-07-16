@@ -9,7 +9,7 @@ export function UnitSelect({
   value,
   onValueChange,
 }: {
-  value: string
+  value?: string
   onValueChange: (val?: string) => void
 }) {
   const { data, isLoading } = useUnits()

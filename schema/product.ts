@@ -1,33 +1,57 @@
+import { ProductServiceStatus, ProductServiceStockStatus } from "@prisma/client"
 import * as z from "zod"
 
 export const productCreateSchema = z.object({
-  name: z.string(),
-  sku: z.string(),
-  status: z.string(),
-  stockStatus: z.string(),
-  categoryId: z.string(),
+  name: z
+    .string({ message: "Name is required." })
+    .min(1, { message: "Name is required." }),
+  sku: z
+    .string({ message: "SKU is required." })
+    .min(1, { message: "SKU is required." }),
 
-  image: z.string(),
+  status: z.nativeEnum(ProductServiceStatus).default("ACTIVE"),
+  stockStatus: z.nativeEnum(ProductServiceStockStatus).default("IN_STOCK"),
 
-  unitId: z.string(),
+  categoryId: z.string().optional(),
 
-  initialQuantity: z.number().int().positive(),
-  asOfDate: z.string().date(),
-  reorderPoint: z.number(),
-  description: z.string(),
-  salesPriceOrRate: z.number(),
+  image: z.string().url({ message: "Invalid image URL." }).optional(),
 
-  inventoryAssetAccountId: z.string(),
-  incomeAccountId: z.string(),
-  purchasingDescription: z.string(),
-  expenseAccountId: z.string(),
+  unitId: z.string().optional(),
 
-  cost: z.number(),
+  description: z.string().optional(),
 
-  isSelling: z.boolean(),
-  isPurchasing: z.boolean(),
+  salesPriceOrRate: z.number().optional(),
 
-  supplierId: z.string(),
+  inventoryAssetAccountId: z.string().optional(),
+  incomeAccountId: z.string().optional(),
+  expenseAccountId: z.string().optional(),
+
+  purchasingDescription: z.string().optional(),
+
+  cost: z.number().optional(),
+
+  isSelling: z.boolean().optional(),
+  isPurchasing: z.boolean().optional(),
+
+  supplierId: z.string().optional(),
+})
+
+export const inventoryCreateSchema = productCreateSchema.extend({
+  initialQuantity: z
+    .number()
+    .int({ message: "Must be a whole number." })
+    .positive({ message: "Must be greater than 0" })
+    .optional(),
+
+  asOfDate: z.string().optional(),
+
+  reorderPoint: z
+    .number()
+    .int({ message: "Must be a whole number." })
+    .positive({ message: "Must be greater than 0" })
+    .optional(),
 })
 
 export type ProductCreateInput = z.infer<typeof productCreateSchema>
+
+export type InventoryCreateInput = z.infer<typeof inventoryCreateSchema>

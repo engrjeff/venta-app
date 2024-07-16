@@ -4,8 +4,12 @@ import { Button } from "@/components/ui/button"
 
 export function QuickNewButton() {
   return (
-    <Button size="sm" variant="secondary" className="w-full rounded-full">
-      <PlusIcon className="mr-3 size-4" /> New
+    <Button
+      size="icon"
+      variant="secondary"
+      className="size-6 shrink-0 rounded-full"
+    >
+      <PlusIcon className="size-3" /> <span className="sr-only">New</span>
     </Button>
   )
 }

@@ -1,4 +1,4 @@
-import { PrismaClient, ROLE } from "@prisma/client"
+import { BookAccountLabel, PrismaClient, ROLE } from "@prisma/client"
 
 import bookAccountsData from "../data/book-accounts.json"
 import { hashPassword } from "../server/utils"
@@ -68,8 +68,8 @@ async function main() {
 
   console.log(`Generated stores: `, storeA.name, storeB.name)
 
-  // generate book accounts
-  // for each book account, generate detail account
+  // generate book account types
+  // for each book account type, generate detail account types
   const bookAccountTypes = await Promise.all(
     bookAccountsData.map(
       async (accountType) =>
@@ -84,6 +84,9 @@ async function main() {
               },
             },
           },
+          include: {
+            detailTypes: true,
+          },
         })
     )
   ).then((values) => values)
@@ -92,6 +95,85 @@ async function main() {
     `Generated Book Account and Detail types: `,
     bookAccountTypes.length
   )
+
+  // generate the ff. Book Accounts (Chart of Accounts)
+  // - Inventory Asset Account
+  // - Income Account
+  // - Expense Account
+  const currentAssetsAccType = bookAccountTypes.find(
+    (b) => b.name === "Current assets"
+  )
+
+  await prisma.bookAccount.createMany({
+    data: [storeA, storeB].map((s) => ({
+      name: "Inventory",
+      accountTypeId: currentAssetsAccType?.id!,
+      detailTypeId: currentAssetsAccType?.detailTypes?.find(
+        (d) => d.name === "Inventory"
+      )?.id!,
+      storeId: s.id,
+      ownerId: user.id,
+      label: BookAccountLabel.INVENTORY,
+    })),
+  })
+
+  const incomeAccType = bookAccountTypes.find((b) => b.name === "Income")
+
+  await prisma.bookAccount.createMany({
+    data: [storeA, storeB].map((s) => ({
+      name: "Sales of Product Income",
+      accountTypeId: incomeAccType?.id!,
+      detailTypeId: incomeAccType?.detailTypes?.find(
+        (d) => d.name === "Sales of Product Income"
+      )?.id!,
+      storeId: s.id,
+      ownerId: user.id,
+      label: BookAccountLabel.INCOME,
+    })),
+  })
+
+  const expenseAccType = bookAccountTypes.find(
+    (b) => b.name === "Cost of sales"
+  )
+
+  await prisma.bookAccount.createMany({
+    data: [storeA, storeB].map((s) => ({
+      name: "Cost of sales",
+      accountTypeId: expenseAccType?.id!,
+      detailTypeId: expenseAccType?.detailTypes?.find(
+        (d) => d.name === "Supplies and materials - COS"
+      )?.id!,
+      storeId: s.id,
+      ownerId: user.id,
+      label: BookAccountLabel.EXPENSE,
+    })),
+  })
+
+  await prisma.bookAccount.createMany({
+    data: [storeA, storeB].map((s) => ({
+      name: "Inventory Shrinkage",
+      accountTypeId: expenseAccType?.id!,
+      detailTypeId: expenseAccType?.detailTypes?.find(
+        (d) => d.name === "Supplies and materials - COS"
+      )?.id!,
+      storeId: s.id,
+      ownerId: user.id,
+      label: BookAccountLabel.EXPENSE,
+    })),
+  })
+
+  await prisma.bookAccount.createMany({
+    data: [storeA, storeB].map((s) => ({
+      name: "Supplies and materials - COS",
+      accountTypeId: expenseAccType?.id!,
+      detailTypeId: expenseAccType?.detailTypes?.find(
+        (d) => d.name === "Supplies and materials - COS"
+      )?.id!,
+      storeId: s.id,
+      ownerId: user.id,
+      label: BookAccountLabel.EXPENSE,
+    })),
+  })
 
   const defaultPaymentMethods = [
     "Cash",

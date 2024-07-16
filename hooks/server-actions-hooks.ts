@@ -1,3 +1,4 @@
+import { BookAccountLabel } from "@prisma/client"
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query"
 import {
   createServerActionsKeyFactory,
@@ -9,6 +10,11 @@ export const QueryKeyFactory = createServerActionsKeyFactory({
   getCategories: (slug: string) => ["getCategories", slug],
   getStoreUnits: (slug: string) => ["getStoreUnits", slug],
   getStoreSuppliers: (slug: string) => ["getStoreSuppliers", slug],
+  getBookAccountsByLabel: (label: BookAccountLabel, slug: string) => [
+    "getBookAccountsByLabel",
+    label,
+    slug,
+  ],
 })
 
 const {

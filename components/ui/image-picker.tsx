@@ -4,43 +4,41 @@
 import * as React from "react"
 import { ImageIcon, XIcon } from "lucide-react"
 
-export function ImagePicker() {
+export function ImagePicker({
+  urlValue,
+  onValueChange,
+}: {
+  urlValue?: string
+  onValueChange: (newUrlValue?: string) => void
+}) {
   const [imageFile, setImageFile] = React.useState<File | null>(null)
 
-  const [previewSrc, setPreviewSrc] = React.useState("")
-
-  const [imageLoading, setImageLoading] = React.useState(false)
-
   const inputRef = React.useRef<HTMLInputElement | null>(null)
-
-  React.useEffect(() => {
-    if (!imageFile) return
-
-    setImageLoading(true)
-
-    const reader = new FileReader()
-
-    reader.onloadend = () => {
-      setPreviewSrc(reader.result as string)
-
-      setImageLoading(false)
-    }
-
-    reader.readAsDataURL(imageFile)
-  }, [imageFile])
 
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const files = e.target.files
 
     if (!files || !files.item(0)) return
 
-    setImageFile(files.item(0))
+    const image = files.item(0)
+
+    if (!image) return
+
+    setImageFile(image)
+
+    const reader = new FileReader()
+
+    reader.onloadend = () => {
+      onValueChange(reader.result as string)
+    }
+
+    reader.readAsDataURL(image)
   }
 
   const handleRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
+    onValueChange("")
     setImageFile(null)
-    setPreviewSrc("")
   }
 
   return (
@@ -63,17 +61,17 @@ export function ImagePicker() {
         <span className="sr-only">choose an image</span>
         {!imageFile && <ImageIcon className="size-6 text-border" />}
 
-        {previewSrc && imageFile && (
+        {urlValue && imageFile && (
           <>
             <img
-              src={previewSrc}
+              src={urlValue}
               alt={imageFile.name}
               className="size-full object-contain"
             />
           </>
         )}
       </label>
-      {previewSrc && imageFile && (
+      {urlValue && imageFile && (
         <button
           className="absolute right-1 top-1 z-20 rounded-full bg-red-500 p-px text-white hover:bg-red-600"
           aria-label="remove image"

@@ -69,11 +69,12 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
   const units = useUnits()
 
   const form = useForm<CreateUnitInput>({
+    mode: "all",
+    resolver: zodResolver(createUnitSchema),
     defaultValues: {
       name: initialValue,
       storeId: store.data?.id,
     },
-    resolver: zodResolver(createUnitSchema),
   })
 
   const conversions = useFieldArray<CreateUnitInput>({
