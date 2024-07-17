@@ -31,8 +31,6 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 
-import { NewCategoryForm } from "./new-category-form"
-
 export function ServiceTypeForm() {
   const form = useForm()
 
@@ -102,7 +100,6 @@ export function ServiceTypeForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <NewCategoryForm />
                     <SelectItem value="category1">Category 1</SelectItem>
                     <SelectItem value="category2">Category 2</SelectItem>
                     <SelectItem value="category3">Category 3</SelectItem>
