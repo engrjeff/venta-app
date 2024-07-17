@@ -129,7 +129,7 @@ model Store {
   ownerId String
 
   productServiceItems ProductServiceItem[]
-  categoris           Category[]
+  categories          Category[]
   suppliers           Supplier[]
   customers           Customer[]
   invoices            Invoice[]
