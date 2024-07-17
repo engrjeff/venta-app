@@ -6,6 +6,20 @@
 npm install
 ```
 
+1. Seed database
+
+```shell
+npx prisma db push
+```
+
+```shell
+npx prisma generate
+```
+
+```shell
+npx prisma db seed
+```
+
 2. Build the app
 
 ```shell
