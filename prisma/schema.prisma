@@ -185,6 +185,7 @@ enum ProductServiceStockStatus {
 enum ProductServiceType {
   INVENTORY
   NON_INVENTORY
+  INVENTORY_ASSEMBLY
   SERVICE
   BUNDLE
 }
@@ -203,6 +204,9 @@ model ProductServiceItem {
 
   unit   Unit?   @relation(fields: [unitId], references: [id])
   unitId String?
+
+  unitConversion   UnitConversion? @relation(fields: [unitConversionId], references: [id])
+  unitConversionId String?
 
   image String?
 
@@ -284,8 +288,9 @@ model Unit {
 model UnitConversion {
   id String @id @default(cuid())
 
-  from String
-  to   String
+  name String
+
+  description String
 
   factor Float
 
@@ -298,9 +303,12 @@ model UnitConversion {
   unit   Unit?   @relation(fields: [unitId], references: [id])
   unitId String?
 
+  productsWithThisConversion ProductServiceItem[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([storeId, name])
   @@index([unitId])
   @@index([storeId])
   @@index([ownerId])

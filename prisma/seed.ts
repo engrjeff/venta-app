@@ -68,6 +68,44 @@ async function main() {
 
   console.log(`Generated stores: `, storeA.name, storeB.name)
 
+  // generate categories
+  const storeACategories = await prisma.category.createMany({
+    data: [
+      "Hot Coffee",
+      "Iced Coffee",
+      "Drinks",
+      "Bread & Pastries",
+      "Supply",
+    ].map((cat) => ({
+      name: cat,
+      ownerId: user.id,
+      storeId: storeA.id,
+    })),
+  })
+
+  const storeBCategories = await prisma.category.createMany({
+    data: [
+      "PVC ID",
+      "Souvenir",
+      "Document Print",
+      "Design",
+      "Invitation Cards",
+    ].map((cat) => ({
+      name: cat,
+      ownerId: user.id,
+      storeId: storeB.id,
+    })),
+  })
+
+  console.log(
+    `Generated categories for ${storeA.name}: `,
+    storeACategories.count
+  )
+  console.log(
+    `Generated categories for ${storeB.name}: `,
+    storeBCategories.count
+  )
+
   // generate book account types
   // for each book account type, generate detail account types
   const bookAccountTypes = await Promise.all(
