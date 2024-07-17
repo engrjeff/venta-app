@@ -24,6 +24,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -157,8 +158,7 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
                 const isValidSoFar = await form.trigger()
                 if (!isValidSoFar) return
                 conversions.append({
-                  from: form.watch("name"),
-                  to: "",
+                  name: "",
                   factor: "",
                 })
               }}
@@ -176,100 +176,83 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
               {"Example: 1 bottle = 250 ml means a factor of 250"}
             </p>
 
-            {conversions.fields.map((conversionField, index) => (
-              <div
-                key={conversionField.id}
-                className="grid grid-cols-[repeat(2,1fr),auto] gap-4"
-              >
-                <FormField
-                  control={form.control}
-                  name={`conversions.${index}.from`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel
-                        htmlFor={`conversions.${index}.from`}
-                        className={cn(
-                          "text-right",
-                          index === 0 ? "" : "sr-only"
-                        )}
-                      >
-                        From <span>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          id={`conversions.${index}.from`}
-                          disabled
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`conversions.${index}.to`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel
-                        htmlFor={`conversions.${index}.to`}
-                        className={cn(
-                          "text-right",
-                          index === 0 ? "" : "sr-only"
-                        )}
-                      >
-                        To <span>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          id={`conversions.${index}.to`}
-                          placeholder="ml"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`conversions.${index}.factor`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel
-                        htmlFor={`conversions.${index}.factor`}
-                        className={cn(
-                          "text-right",
-                          index === 0 ? "" : "sr-only"
-                        )}
-                      >
-                        Factor <span>*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <div className="flex items-center gap-3 ">
+            <div className="space-y-2">
+              {conversions.fields.map((conversionField, index) => (
+                <div
+                  key={conversionField.id}
+                  className="grid grid-cols-[repeat(1,1fr),auto] gap-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name={`conversions.${index}.factor`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel
+                          htmlFor={`conversions.${index}.factor`}
+                          className={cn(
+                            "text-right",
+                            index === 0 ? "" : "sr-only"
+                          )}
+                        >
+                          Factor <span>*</span>
+                        </FormLabel>
+                        <FormControl>
                           <NumberInput
                             id={`conversions.${index}.factor`}
-                            placeholder="250"
                             {...field}
                           />
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="outline"
-                            className="shrink-0"
-                            onClick={() => conversions.remove(index)}
-                          >
-                            <span className="sr-only">Remove</span>
-                            <MinusCircleIcon className="size-4" />
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            ))}
+                        </FormControl>
+                        {form.watch(`conversions.${index}.name`) &&
+                        form.watch(`conversions.${index}.factor`) ? (
+                          <FormDescription>
+                            1 {form.watch("name")} ={" "}
+                            {form.watch(`conversions.${index}.factor`)}{" "}
+                            {form.watch(`conversions.${index}.name`)}
+                          </FormDescription>
+                        ) : null}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`conversions.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel
+                          htmlFor={`conversions.${index}.name`}
+                          className={cn(
+                            "text-right",
+                            index === 0 ? "" : "sr-only"
+                          )}
+                        >
+                          To <span>*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <div className="flex items-center gap-3 ">
+                            <Input
+                              id={`conversions.${index}.name`}
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="outline"
+                              className="shrink-0"
+                              onClick={() => conversions.remove(index)}
+                            >
+                              <span className="sr-only">Remove</span>
+                              <MinusCircleIcon className="size-4" />
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ))}
+            </div>
 
             <Button
               type="button"
@@ -280,8 +263,7 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
                 const isValidSoFar = await form.trigger()
                 if (!isValidSoFar) return
                 conversions.append({
-                  from: form.watch("name"),
-                  to: "",
+                  name: "",
                   factor: "",
                 })
               }}

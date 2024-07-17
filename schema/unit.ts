@@ -5,8 +5,8 @@ export const createUnitSchema = z.object({
   name: z.string().min(1, { message: "Unit name is required." }),
   conversions: z.array(
     z.object({
-      from: z.string().min(1, { message: "Required." }),
-      to: z.string().min(1, { message: "Required." }),
+      name: z.string().min(1, { message: "Required." }),
+      description: z.string().optional(),
       factor: z.string().min(1, { message: "Required." }),
     })
   ),

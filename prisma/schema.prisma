@@ -290,7 +290,7 @@ model UnitConversion {
 
   name String
 
-  description String
+  description String?
 
   factor Float
 

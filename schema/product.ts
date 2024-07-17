@@ -18,6 +18,8 @@ export const productCreateSchema = z.object({
 
   unitId: z.string().optional(),
 
+  unitConversionId: z.string().optional(),
+
   description: z.string().optional(),
 
   salesPriceOrRate: z.number().optional(),

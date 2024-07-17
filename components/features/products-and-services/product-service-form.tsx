@@ -1,6 +1,7 @@
 "use client"
 
 import { ReactNode, useState } from "react"
+import { ProductServiceType } from "@prisma/client"
 
 import { Button } from "@/components/ui/button"
 
@@ -10,21 +11,20 @@ import { NonInventoryTypeForm } from "./non-inventory-type-form"
 import { ProductTypePicker } from "./product-type-picker"
 import { ServiceTypeForm } from "./service-type-form"
 
-type ProductType = "Inventory" | "Non-inventory" | "Service" | "Bundle"
-
-const formMap: Record<ProductType, ReactNode> = {
-  Inventory: <InventoryTypeForm />,
-  "Non-inventory": <NonInventoryTypeForm />,
-  Service: <ServiceTypeForm />,
-  Bundle: <BundleTypeForm />,
+const formMap: Record<ProductServiceType, ReactNode> = {
+  INVENTORY: <InventoryTypeForm />,
+  NON_INVENTORY: <NonInventoryTypeForm />,
+  INVENTORY_ASSEMBLY: <NonInventoryTypeForm />,
+  SERVICE: <ServiceTypeForm />,
+  BUNDLE: <BundleTypeForm />,
 }
 
 export function ProductServiceForm() {
   const [view, setView] = useState<"form" | "type-picker">("type-picker")
-  const [productType, setProductType] = useState<ProductType>()
+  const [productType, setProductType] = useState<ProductServiceType>()
 
   function handleProducTypeChange(value: string) {
-    setProductType(value as ProductType)
+    setProductType(value as ProductServiceType)
 
     setTimeout(() => {
       setView("form")

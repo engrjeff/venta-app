@@ -36,10 +36,11 @@ export const createUnit = authedProcedure
           ownerId: ctx.user.id,
           storeId: input.storeId,
           name: input.name,
+
           conversions: {
             create: input.conversions.map((conversion) => ({
-              from: conversion.from,
-              to: conversion.to,
+              name: conversion.name,
+              description: conversion.description,
               factor: Number(conversion.factor),
               ownerId: ctx.user.id,
               storeId: input.storeId,
@@ -49,5 +50,7 @@ export const createUnit = authedProcedure
       })
 
       return result
-    } catch (error) {}
+    } catch (error) {
+      console.log(error)
+    }
   })

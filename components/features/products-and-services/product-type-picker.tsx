@@ -1,26 +1,41 @@
 "use client"
 
+import { ProductServiceType } from "@prisma/client"
+
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
-const productItemTypes = [
+const productItemTypes: Array<{
+  name: string
+  description: string
+  type: ProductServiceType
+}> = [
   {
     name: "Inventory",
     description: "Products you buy and/or sell that you track quantities of.",
+    type: "INVENTORY",
+  },
+  {
+    name: "Inventory Assembly",
+    description: "Products you buy and/or sell that you track quantities of.",
+    type: "INVENTORY_ASSEMBLY",
   },
   {
     name: "Non-inventory",
     description:
       "Products you buy and/or sell but don't need to (or can't) track quantities of.",
+    type: "NON_INVENTORY",
   },
   {
     name: "Service",
     description: "Services that you provide to customers. e.g. Delivery.",
+    type: "SERVICE",
   },
   {
     name: "Bundle",
     description:
       "A collection of products and/or services that you sell together.",
+    type: "BUNDLE",
   },
 ]
 
@@ -40,7 +55,7 @@ export function ProductTypePicker({
         >
           <RadioGroupItem
             className="peer shrink-0"
-            value={productType.name}
+            value={productType.type}
             id={productType.name}
           />
           <Label

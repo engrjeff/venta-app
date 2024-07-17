@@ -40,6 +40,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { BookAccountsSelect } from "./book-accounts-select"
 import { CategorySelect } from "./category-select"
 import { SupplierSelect } from "./supplier-select"
+import { UnitConversionPicker } from "./unit-conversion-picker"
 import { UnitSelect } from "./unit-select"
 
 export function InventoryTypeForm() {
@@ -166,14 +167,14 @@ export function InventoryTypeForm() {
               </FormItem>
             )}
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <FormField
               name="initialQuantity"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Initial Quantity on hand <span>*</span>
+                    Initial Qty <span>*</span>
                   </FormLabel>
                   <FormControl>
                     <NumberInput
@@ -188,22 +189,7 @@ export function InventoryTypeForm() {
                 </FormItem>
               )}
             />
-            <FormField
-              name="unitId"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Unit</FormLabel>
-                  <FormControl>
-                    <UnitSelect
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <FormField
               name="asOfDate"
               control={form.control}
@@ -275,6 +261,44 @@ export function InventoryTypeForm() {
               )}
             />
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              name="unitId"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unit</FormLabel>
+                  <FormControl>
+                    <UnitSelect
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="unitConversionId"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Conversion</FormLabel>
+                  <FormControl>
+                    <UnitConversionPicker
+                      unitId={form.watch("unitId")}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <Separator />
           <FormField
             control={form.control}
