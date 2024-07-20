@@ -7,7 +7,12 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, getSkip } from "./config"
 import { authedProcedure } from "./procedures/auth"
-import { changeStatusSchema, withPaginationAndSort, withStoreId } from "./types"
+import {
+  changeStatusSchema,
+  withEntityId,
+  withPaginationAndSort,
+  withStoreId,
+} from "./types"
 
 export const getCategories = authedProcedure
   .createServerAction()
@@ -117,7 +122,55 @@ export const updateCategoryStatus = authedProcedure
 
       // revalidate here
       revalidatePath(`/${result.store.slug}/categories`)
+
+      return result
     } catch (error) {
       if (typeof error === "string") throw error
+    }
+  })
+
+export const updateCategory = authedProcedure
+  .createServerAction()
+  .input(withEntityId.merge(createCategorySchema).partial())
+  .handler(async ({ ctx, input }) => {
+    try {
+      const category = await prisma.category.findUnique({
+        where: { id: input.id },
+      })
+
+      if (!category) throw `Cannot find category with ID ${input.id}`
+
+      const result = await prisma.category.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+        },
+        include: {
+          store: {
+            select: {
+              slug: true,
+            },
+          },
+        },
+      })
+
+      // revalidate here
+      revalidatePath(`/${result.store.slug}/categories`)
+
+      return result
+    } catch (error) {
+      console.log(error)
+      if (typeof error === "string") throw error
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case "P2002":
+            throw `${input.name} already exists.`
+          default:
+            throw error.message
+        }
+      }
     }
   })

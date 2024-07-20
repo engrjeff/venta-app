@@ -19,6 +19,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogPortal,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -26,11 +33,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+import { EditCategoryForm } from "./edit-category-form"
+
 interface Props {
   category: Category
 }
 
-type RowAction = "copy" | "change-status" | "assign-to-product"
+type RowAction = "edit" | "change-status" | "assign-to-product"
 
 export function CategoryRowActions({ category }: Props) {
   const [action, setAction] = useState<RowAction>()
@@ -59,7 +68,7 @@ export function CategoryRowActions({ category }: Props) {
   return (
     <>
       <div className="flex items-center gap-4">
-        <Button size="sm" variant="link">
+        <Button size="sm" variant="link" onClick={() => setAction("edit")}>
           Edit
         </Button>
         <DropdownMenu>
@@ -107,6 +116,29 @@ export function CategoryRowActions({ category }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog
+        open={action === "edit"}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setAction(undefined)
+        }}
+      >
+        <DialogPortal>
+          <DialogContent
+            className="sm:max-w-md"
+            onInteractOutside={(e) => e.preventDefault()}
+          >
+            <DialogHeader>
+              <DialogTitle>Edit {category.name}</DialogTitle>
+            </DialogHeader>
+
+            <EditCategoryForm
+              category={category}
+              onAfterSave={() => setAction(undefined)}
+            />
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
     </>
   )
 }
