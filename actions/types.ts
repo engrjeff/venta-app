@@ -1,3 +1,4 @@
+import { ItemStatus } from "@prisma/client"
 import * as z from "zod"
 
 export const withStoreId = z.object({
@@ -15,4 +16,9 @@ export const withPaginationAndSort = z.object({
 
 export const withEntityId = z.object({
   id: z.string({ required_error: "ID is required." }),
+})
+
+export const changeStatusSchema = z.object({
+  id: z.string({ required_error: "ID is required." }),
+  status: z.nativeEnum(ItemStatus),
 })

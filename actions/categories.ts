@@ -7,7 +7,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, getSkip } from "./config"
 import { authedProcedure } from "./procedures/auth"
-import { withPaginationAndSort, withStoreId } from "./types"
+import { changeStatusSchema, withPaginationAndSort, withStoreId } from "./types"
 
 export const getCategories = authedProcedure
   .createServerAction()
@@ -85,5 +85,39 @@ export const createCategory = authedProcedure
             throw `${input.name} already exists.`
         }
       }
+    }
+  })
+
+export const updateCategoryStatus = authedProcedure
+  .createServerAction()
+  .input(changeStatusSchema)
+  .handler(async ({ ctx, input }) => {
+    try {
+      const category = await prisma.category.findUnique({
+        where: { id: input.id },
+      })
+
+      if (!category) throw `Cannot find category with ID ${input.id}`
+
+      const result = await prisma.category.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          status: input.status,
+        },
+        include: {
+          store: {
+            select: {
+              slug: true,
+            },
+          },
+        },
+      })
+
+      // revalidate here
+      revalidatePath(`/${result.store.slug}/categories`)
+    } catch (error) {
+      if (typeof error === "string") throw error
     }
   })

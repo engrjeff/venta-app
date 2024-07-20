@@ -1,17 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { Category } from "@prisma/client"
+import { updateCategoryStatus } from "@/actions/categories"
+import { Category, ItemStatus } from "@prisma/client"
 import { MoreHorizontal } from "lucide-react"
+import { toast } from "sonner"
+import { useServerAction } from "zsa-react"
 
-import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogPortal,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,14 +30,31 @@ interface Props {
   category: Category
 }
 
-interface PropsWithCallback extends Props {
-  afterSave: () => void
-}
-
-type RowAction = "copy" | "make-inactive" | "delete"
+type RowAction = "copy" | "change-status" | "delete"
 
 export function CategoryRowActions({ category }: Props) {
   const [action, setAction] = useState<RowAction>()
+
+  const updateStatusAction = useServerAction(updateCategoryStatus)
+
+  async function handleUpdateStatus() {
+    try {
+      const [data, err] = await updateStatusAction.execute({
+        id: category.id,
+        status:
+          category.status === ItemStatus.ACTIVE
+            ? ItemStatus.INACTIVE
+            : ItemStatus.ACTIVE,
+      })
+
+      if (err) {
+        toast.error(err.message)
+        return
+      }
+
+      toast.success(`Category status updated!`)
+    } catch (error) {}
+  }
 
   return (
     <>
@@ -48,8 +71,10 @@ export function CategoryRowActions({ category }: Props) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => setAction("make-inactive")}>
-              Make Inactive
+            <DropdownMenuItem onClick={() => setAction("change-status")}>
+              {category.status === ItemStatus.ACTIVE
+                ? "Make Inactive"
+                : "Make Active"}
             </DropdownMenuItem>
             <DropdownMenuItem className="text-destructive">
               Delete
@@ -58,23 +83,32 @@ export function CategoryRowActions({ category }: Props) {
         </DropdownMenu>
       </div>
 
-      <Dialog
-        open={action === "copy"}
+      <AlertDialog
+        open={action === "change-status"}
         onOpenChange={(isOpen) => {
           if (!isOpen) setAction(undefined)
         }}
       >
-        <DialogPortal>
-          <DialogContent
-            className="sm:max-w-md"
-            onInteractOutside={(e) => e.preventDefault()}
-          >
-            <DialogHeader>
-              <DialogTitle>Copy Category</DialogTitle>
-            </DialogHeader>
-          </DialogContent>
-        </DialogPortal>
-      </Dialog>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will make{" "}
+              <strong className="text-primary">{category.name}</strong>{" "}
+              {category.status === ItemStatus.ACTIVE
+                ? `inactive. You will not be able to use this category unless you
+              make it Active again.`
+                : "active again."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction type="button" onClick={handleUpdateStatus}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
