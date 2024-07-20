@@ -318,12 +318,19 @@ model UnitConversion {
   @@index([ownerId, storeId])
 }
 
+enum ItemStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model Category {
   id String @id @default(cuid())
 
   name String
 
   productServiceItems ProductServiceItem[]
+
+  status ItemStatus @default(ACTIVE)
 
   store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
