@@ -101,7 +101,9 @@ export const columns: ColumnDef<ProductItem>[] = [
       )
     },
     cell: ({ row }) => (
-      <div className="text-right">{row.getValue("salesPriceOrRate")}</div>
+      <div className="text-nowrap text-right">
+        {row.getValue("salesPriceOrRate")}
+      </div>
     ),
   },
   {
@@ -109,7 +111,9 @@ export const columns: ColumnDef<ProductItem>[] = [
     header: ({ column }) => {
       return <SortLink className="justify-end" sortValue="cost" title="Cost" />
     },
-    cell: ({ row }) => <div className="text-right">{row.getValue("cost")}</div>,
+    cell: ({ row }) => (
+      <div className="text-nowrap text-right">{row.getValue("cost")}</div>
+    ),
   },
   {
     id: "actions",
