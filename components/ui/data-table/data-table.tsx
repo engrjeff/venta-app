@@ -30,7 +30,7 @@ export function DataTable<TData>({
                 return (
                   <TableHead
                     key={header.id}
-                    className={header.id === "select" ? "" : "px-0"}
+                    className={header.id === "select" ? "" : "px-1"}
                   >
                     {header.isPlaceholder
                       ? null
