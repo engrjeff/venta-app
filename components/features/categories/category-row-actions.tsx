@@ -30,7 +30,7 @@ interface Props {
   category: Category
 }
 
-type RowAction = "copy" | "change-status" | "delete"
+type RowAction = "copy" | "change-status" | "assign-to-product"
 
 export function CategoryRowActions({ category }: Props) {
   const [action, setAction] = useState<RowAction>()
@@ -76,9 +76,7 @@ export function CategoryRowActions({ category }: Props) {
                 ? "Make Inactive"
                 : "Make Active"}
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
-              Delete
-            </DropdownMenuItem>
+            <DropdownMenuItem>Assign to Product</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
