@@ -10,8 +10,8 @@ export const withStoreId = z.object({
 export const withPaginationAndSort = z.object({
   page: z.number().int().positive().optional().default(1),
   limit: z.number().int().positive().default(10),
-  sort: z.string().default("createdAt"),
-  order: z.string().default("desc"),
+  sort: z.string().default("name"),
+  order: z.string().default("asc"),
 })
 
 export const withEntityId = z.object({
