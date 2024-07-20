@@ -74,7 +74,7 @@ function CategoryForm({ initialValue, onAfterSave }: Props) {
 
   const createCategoryAction = useServerAction(createCategory)
 
-  const [name, setName] = useState(() => initialValue)
+  const [name, setName] = useState(() => initialValue ?? "")
 
   const isBusy = createCategoryAction.isPending || store.isLoading
 
