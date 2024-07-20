@@ -283,6 +283,7 @@ model Unit {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([storeId, name])
   @@index([storeId])
   @@index([ownerId])
   @@index([ownerId, storeId])
