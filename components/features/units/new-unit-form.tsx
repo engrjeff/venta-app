@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { createUnit } from "@/actions/units"
 import { CreateUnitInput, createUnitSchema } from "@/schema/unit"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -34,16 +35,19 @@ import { NumberInput } from "@/components/ui/number-input"
 
 interface Props {
   initialValue?: string
-  onAfterSave: (newCategory: string) => void
+  onAfterSave?: (newUnit: string) => void
+  main?: boolean
 }
 
-export function NewUnitForm({ initialValue, onAfterSave }: Props) {
+export function NewUnitForm({ initialValue, onAfterSave, main }: Props) {
+  const [open, setOpen] = useState(false)
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
           size="sm"
-          variant="secondary"
+          variant={main ? "default" : "secondary"}
           className="mb-1 w-full justify-start"
         >
           <PlusIcon className="mr-3 size-4" /> Add{" "}
@@ -57,7 +61,15 @@ export function NewUnitForm({ initialValue, onAfterSave }: Props) {
         <DialogHeader>
           <DialogTitle>New Unit</DialogTitle>
         </DialogHeader>
-        <UnitForm initialValue={initialValue} onAfterSave={onAfterSave} />
+        <UnitForm
+          initialValue={initialValue}
+          onAfterSave={(value) => {
+            if (onAfterSave) {
+              onAfterSave(value)
+            }
+            setOpen(false)
+          }}
+        />
       </DialogContent>
     </Dialog>
   )
@@ -72,7 +84,7 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
     mode: "all",
     resolver: zodResolver(createUnitSchema),
     defaultValues: {
-      name: initialValue,
+      name: initialValue ?? "",
       storeId: store.data?.id,
     },
   })
@@ -87,6 +99,7 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
   const isBusy = createUnitAction.isPending || store.isLoading
 
   function onError(errors: FieldErrors<CreateUnitInput>) {
+    console.log(store.data?.id)
     console.log(errors)
   }
 
@@ -109,7 +122,7 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
 
       await units.refetch()
 
-      if (result) {
+      if (result && onAfterSave) {
         onAfterSave(result.id)
       }
     } catch (error) {}
@@ -128,7 +141,11 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
         }}
       >
         <fieldset className="space-y-2" disabled={isBusy}>
-          <input type="hidden" {...form.register("storeId")} />
+          <input
+            type="hidden"
+            {...form.register("storeId")}
+            defaultValue={store.data?.id ?? ""}
+          />
           <FormField
             control={form.control}
             name="name"

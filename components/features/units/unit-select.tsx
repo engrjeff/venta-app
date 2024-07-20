@@ -22,11 +22,11 @@ export function UnitSelect({
       disabled={isLoading}
       key={value}
       options={
-        data?.map((item) => ({ value: item.id, label: item.name })) ?? []
+        data?.items?.map((item) => ({ value: item.id, label: item.name })) ?? []
       }
       renderEmpty={(search) => (
         <NewUnitForm
-          key={data?.length}
+          key={data?.items?.length}
           initialValue={search}
           onAfterSave={onValueChange}
         />

@@ -16,7 +16,7 @@ export function UnitConversionPicker({
 }) {
   const { data, isLoading } = useUnits()
 
-  const unit = data?.find((u) => u.id === unitId)
+  const unit = data?.items?.find((u) => u.id === unitId)
 
   const disabled = isLoading || !unitId
 

@@ -15,7 +15,7 @@ export function ConversionInfo({
 
   if (!unitId || !conversionId) return null
 
-  const unit = units.data?.find((u) => u.id === unitId)
+  const unit = units.data?.items?.find((u) => u.id === unitId)
 
   if (!unit) return null
 
