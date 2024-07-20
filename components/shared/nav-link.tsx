@@ -19,7 +19,7 @@ export const NavLink = React.forwardRef<
       {...props}
       ref={ref}
       className={cn(
-        "flex items-center gap-3 rounded px-3 py-1.5 transition-all text-sm",
+        "flex items-center gap-3 rounded px-3 py-1.5 transition-all text-[13px]",
         isActive
           ? "text-primary-foreground bg-primary data-[submenu=true]:bg-background data-[submenu=true]:text-primary"
           : "text-muted-foreground hover:text-primary",

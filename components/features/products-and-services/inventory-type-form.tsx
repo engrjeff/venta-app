@@ -4,19 +4,12 @@ import { createInventoryProduct } from "@/actions/products"
 import { InventoryCreateInput, inventoryCreateSchema } from "@/schema/product"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
-import { ChevronDownIcon } from "lucide-react"
 import { FieldErrors, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { useServerAction } from "zsa-react"
 
 import { useCurrentStore } from "@/hooks/useCurrentStore"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Form,
   FormControl,
@@ -36,18 +29,25 @@ import {
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { ConversionInfo } from "@/components/features/units/conversion-info"
+import { UnitConversionPicker } from "@/components/features/units/unit-conversion-picker"
+import { UnitSelect } from "@/components/features/units/unit-select"
 
+import { CategorySelect } from "../categories/category-select"
 import { BookAccountsSelect } from "./book-accounts-select"
-import { CategorySelect } from "./category-select"
+import { SkuInput } from "./sku-input"
 import { SupplierSelect } from "./supplier-select"
-import { UnitConversionPicker } from "./unit-conversion-picker"
-import { UnitSelect } from "./unit-select"
 
-export function InventoryTypeForm() {
+interface Props {
+  closeCallback?: () => void
+}
+
+export function InventoryTypeForm({ closeCallback }: Props) {
   const store = useCurrentStore()
 
   const form = useForm<InventoryCreateInput>({
     resolver: zodResolver(inventoryCreateSchema),
+    mode: "onChange",
     defaultValues: {
       initialQuantity: 0,
       reorderPoint: 0,
@@ -61,11 +61,16 @@ export function InventoryTypeForm() {
 
   const createAction = useServerAction(createInventoryProduct)
 
+  const isBusy = createAction.isPending
+
   function onError(errors: FieldErrors<InventoryCreateInput>) {
     console.log(errors)
   }
 
-  async function onSubmit({ image, ...values }: InventoryCreateInput) {
+  async function onSubmit(
+    { image, ...values }: InventoryCreateInput,
+    shouldClose?: boolean
+  ) {
     try {
       if (!store.data?.id) return
 
@@ -80,13 +85,34 @@ export function InventoryTypeForm() {
       }
 
       toast.success(`${data?.name} was saved!`)
+
+      form.reset()
+
+      if (shouldClose) {
+        // close form sheet
+        if (closeCallback) {
+          closeCallback()
+        }
+      }
     } catch (error) {}
+  }
+
+  async function saveAndNew() {
+    const isValid = await form.trigger(undefined, { shouldFocus: true })
+
+    if (!isValid) return
+
+    const values = form.getValues()
+
+    await onSubmit(values, false)
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit, onError)}>
-        <fieldset className="space-y-3 p-4">
+      <form
+        onSubmit={form.handleSubmit((data) => onSubmit(data, true), onError)}
+      >
+        <fieldset className="space-y-3 p-4" disabled={isBusy}>
           <div className="flex justify-between gap-8">
             <div className="flex-1 space-y-3">
               <FormField
@@ -121,7 +147,12 @@ export function InventoryTypeForm() {
                       SKU <span>*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="SKU" {...field} />
+                      <SkuInput
+                        placeholder="SKU"
+                        productName={form.watch("name")}
+                        {...field}
+                        onValueChange={field.onChange}
+                      />
                     </FormControl>
                     <FormDescription>Generate or type manually</FormDescription>
                     <FormMessage />
@@ -299,6 +330,11 @@ export function InventoryTypeForm() {
             />
           </div>
 
+          <ConversionInfo
+            unitId={form.watch("unitId")}
+            conversionId={form.watch("unitConversionId")}
+          />
+
           <Separator />
           <FormField
             control={form.control}
@@ -448,21 +484,19 @@ export function InventoryTypeForm() {
         </fieldset>
 
         <div className="sticky bottom-0 border-t bg-background p-4">
-          <div className="flex items-center justify-end divide-x divide-white/10">
-            <Button type="submit" size="sm" className="rounded-r-none">
+          <div className="flex items-center justify-end gap-3">
+            <Button type="submit" size="sm" loading={isBusy}>
+              Save and Close
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={saveAndNew}
+              loading={isBusy}
+            >
               Save and New
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="icon" className="size-9 rounded-l-none">
-                  <span className="sr-only">click for more</span>{" "}
-                  <ChevronDownIcon className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Save and Close</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </form>

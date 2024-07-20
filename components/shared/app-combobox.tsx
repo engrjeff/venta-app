@@ -61,7 +61,7 @@ export function AppCombobox({
           disabled={disabled}
         >
           {value
-            ? options.find((option) => option.value === value)?.label
+            ? options.find((option) => option.value === value)?.label ?? label
             : label}
           <ChevronDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
@@ -73,7 +73,18 @@ export function AppCombobox({
           width: fullwidth ? "var(--radix-popover-trigger-width)" : "100%",
         }}
       >
-        <Command>
+        <Command
+          filter={(value, search) => {
+            if (
+              options
+                .find((i) => i.value === value)
+                ?.label.toLowerCase()
+                .includes(search.toLowerCase())
+            )
+              return 1
+            return 0
+          }}
+        >
           <CommandInput
             value={search}
             onValueChange={setSearch}
@@ -82,9 +93,7 @@ export function AppCombobox({
             autoFocus={false}
           />
           <CommandEmpty
-            className={cn(
-              renderEmpty ? "p-2 pb-0" : "py-6 text-center text-sm"
-            )}
+            className={cn(renderEmpty ? "p-2" : "py-6 text-center text-sm")}
           >
             {renderEmpty ? <>{renderEmpty(search)}</> : "No item found"}
           </CommandEmpty>

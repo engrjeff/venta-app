@@ -24,7 +24,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -158,12 +157,13 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
                 const isValidSoFar = await form.trigger()
                 if (!isValidSoFar) return
                 conversions.append({
+                  to: "",
                   name: "",
                   factor: "",
                 })
               }}
             >
-              + Conversion
+              <PlusCircleIcon className="mr-2 size-3" /> Conversion
             </Button>
           </div>
         ) : (
@@ -180,8 +180,65 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
               {conversions.fields.map((conversionField, index) => (
                 <div
                   key={conversionField.id}
-                  className="grid grid-cols-[repeat(1,1fr),auto] gap-4"
+                  className="grid grid-cols-[auto,100px,150px] gap-4"
                 >
+                  <FormField
+                    control={form.control}
+                    name={`conversions.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel
+                          htmlFor={`conversions.${index}.name`}
+                          className={cn(
+                            "text-right",
+                            index === 0 ? "" : "sr-only"
+                          )}
+                        >
+                          Name <span>*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <div>
+                            <Input
+                              id={`conversions.${index}.name`}
+                              {...field}
+                            />
+                            {form.watch(`conversions.${index}.name`) &&
+                            form.watch(`conversions.${index}.factor`) ? (
+                              <p className="mt-2 text-xs text-muted-foreground">
+                                1 {form.watch("name")} ={" "}
+                                {form.watch(`conversions.${index}.factor`)}{" "}
+                                {form.watch(`conversions.${index}.to`)}
+                              </p>
+                            ) : null}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name={`conversions.${index}.to`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel
+                          htmlFor={`conversions.${index}.to`}
+                          className={cn(
+                            "text-right",
+                            index === 0 ? "" : "sr-only "
+                          )}
+                        >
+                          To <span>*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input id={`conversions.${index}.to`} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormField
                     control={form.control}
                     name={`conversions.${index}.factor`}
@@ -197,41 +254,9 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
                           Factor <span>*</span>
                         </FormLabel>
                         <FormControl>
-                          <NumberInput
-                            id={`conversions.${index}.factor`}
-                            {...field}
-                          />
-                        </FormControl>
-                        {form.watch(`conversions.${index}.name`) &&
-                        form.watch(`conversions.${index}.factor`) ? (
-                          <FormDescription>
-                            1 {form.watch("name")} ={" "}
-                            {form.watch(`conversions.${index}.factor`)}{" "}
-                            {form.watch(`conversions.${index}.name`)}
-                          </FormDescription>
-                        ) : null}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`conversions.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel
-                          htmlFor={`conversions.${index}.name`}
-                          className={cn(
-                            "text-right",
-                            index === 0 ? "" : "sr-only"
-                          )}
-                        >
-                          To <span>*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <div className="flex items-center gap-3 ">
-                            <Input
-                              id={`conversions.${index}.name`}
+                          <div className="flex items-center gap-3">
+                            <NumberInput
+                              id={`conversions.${index}.factor`}
                               {...field}
                             />
                             <Button
@@ -246,6 +271,7 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
                             </Button>
                           </div>
                         </FormControl>
+
                         <FormMessage />
                       </FormItem>
                     )}
@@ -264,6 +290,7 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
                 if (!isValidSoFar) return
                 conversions.append({
                   name: "",
+                  to: "",
                   factor: "",
                 })
               }}

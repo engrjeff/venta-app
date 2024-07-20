@@ -6,7 +6,13 @@ export const withStoreId = z.object({
     .min(1, { message: "Store ID is required." }),
 })
 
-export const withPagination = z.object({
-  page: z.number().int().positive().default(1),
-  limit: z.number().int().positive().default(50),
+export const withPaginationAndSort = z.object({
+  page: z.number().int().positive().optional().default(1),
+  limit: z.number().int().positive().default(10),
+  sort: z.string().default("createdAt"),
+  order: z.string().default("desc"),
+})
+
+export const withEntityId = z.object({
+  id: z.string({ required_error: "ID is required." }),
 })

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { ChevronDownIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -20,9 +21,11 @@ import {
 import { ProductServiceForm } from "./product-service-form"
 
 export function NewButton() {
+  const [open, setOpen] = useState(false)
+
   return (
     <div className="flex items-center divide-x divide-white/10 overflow-hidden rounded-md">
-      <Sheet>
+      <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button size="sm" className="rounded-none">
             New
@@ -37,7 +40,7 @@ export function NewButton() {
           <SheetHeader className="border-b p-4">
             <SheetTitle>Products & Services</SheetTitle>
           </SheetHeader>
-          <ProductServiceForm />
+          <ProductServiceForm closeCallback={() => setOpen(false)} />
         </SheetContent>
       </Sheet>
       <DropdownMenu>

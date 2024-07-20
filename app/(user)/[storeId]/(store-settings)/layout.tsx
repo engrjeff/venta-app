@@ -10,14 +10,8 @@ function StoreSettingsPagesLayout({
   params: { storeId: string }
 }) {
   return (
-    <div className="rounded-lg border bg-background">
-      <div className="p-4">
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage categories, product units, chart of accounts.
-        </p>
-      </div>
-      <div className="border-b px-0">
+    <div className="bg-background">
+      <div className="border-b px-2">
         <TabLink href={`/${storeId}/categories`}>Categories</TabLink>
         <TabLink href={`/${storeId}/units`}>Units</TabLink>
         <TabLink href={`/${storeId}/chart-of-accounts`}>

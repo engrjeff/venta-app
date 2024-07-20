@@ -24,16 +24,21 @@ import { Label } from "@/components/ui/label"
 
 interface Props {
   initialValue?: string
-  onAfterSave: (newCategory: string) => void
+  onAfterSave?: (newCategory: string) => void
+  main?: boolean
 }
 
-export function NewCategoryForm({ initialValue, onAfterSave }: Props) {
+export function NewCategoryForm({ initialValue, onAfterSave, main }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="secondary" className="w-full justify-start">
+        <Button
+          size="sm"
+          variant={main ? "default" : "secondary"}
+          className="w-full justify-start"
+        >
           <PlusIcon className="mr-3 size-4" /> Add{" "}
           {initialValue ? `"${initialValue}"` : "New"}
         </Button>
@@ -50,7 +55,9 @@ export function NewCategoryForm({ initialValue, onAfterSave }: Props) {
           <CategoryForm
             initialValue={initialValue}
             onAfterSave={(value) => {
-              onAfterSave(value)
+              if (onAfterSave) {
+                onAfterSave(value)
+              }
               setOpen(false)
             }}
           />
@@ -92,7 +99,7 @@ function CategoryForm({ initialValue, onAfterSave }: Props) {
 
     await categories.refetch()
 
-    if (result) {
+    if (result && onAfterSave) {
       onAfterSave(result.id)
     }
   }

@@ -56,6 +56,17 @@ export const inventoryCreateSchema = productCreateSchema.extend({
     .optional(),
 })
 
+export const copyProductSchema = inventoryCreateSchema
+  .pick({
+    name: true,
+    sku: true,
+  })
+  .extend({
+    productToCopyId: z.string(),
+  })
+
 export type ProductCreateInput = z.infer<typeof productCreateSchema>
 
 export type InventoryCreateInput = z.infer<typeof inventoryCreateSchema>
+
+export type CopyProductInput = z.infer<typeof copyProductSchema>

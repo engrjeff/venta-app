@@ -247,6 +247,7 @@ model ProductServiceItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([storeId, sku])
   @@unique([storeId, name])
   @@index([storeId])
   @@index([ownerId])
@@ -290,6 +291,8 @@ model UnitConversion {
 
   name String
 
+  to String
+
   description String?
 
   factor Float
@@ -308,7 +311,7 @@ model UnitConversion {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([storeId, name])
+  @@unique([storeId, unitId, name])
   @@index([unitId])
   @@index([storeId])
   @@index([ownerId])
@@ -448,6 +451,7 @@ model Supplier {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([storeId, name])
   @@index([storeId])
   @@index([ownerId])
   @@index([ownerId, storeId])
@@ -574,6 +578,7 @@ model StoreTag {
   billsWithTag Bill?   @relation(fields: [billId], references: [id])
   billId       String?
 
+  @@unique([storeId, name])
   @@index([groupId])
   @@index([storeId])
   @@index([invoiceId])
@@ -592,6 +597,7 @@ model StoreTagGroup {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([storeId, name])
   @@index([storeId])
 }
 
@@ -611,6 +617,7 @@ model PaymentMethod {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([storeId, name])
   @@index([storeId])
   @@index([ownerId])
   @@index([ownerId, storeId])

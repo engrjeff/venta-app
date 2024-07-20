@@ -11,17 +11,21 @@ import { NonInventoryTypeForm } from "./non-inventory-type-form"
 import { ProductTypePicker } from "./product-type-picker"
 import { ServiceTypeForm } from "./service-type-form"
 
-const formMap: Record<ProductServiceType, ReactNode> = {
-  INVENTORY: <InventoryTypeForm />,
-  NON_INVENTORY: <NonInventoryTypeForm />,
-  INVENTORY_ASSEMBLY: <NonInventoryTypeForm />,
-  SERVICE: <ServiceTypeForm />,
-  BUNDLE: <BundleTypeForm />,
+interface Props {
+  closeCallback?: () => void
 }
 
-export function ProductServiceForm() {
+export function ProductServiceForm({ closeCallback }: Props) {
   const [view, setView] = useState<"form" | "type-picker">("type-picker")
   const [productType, setProductType] = useState<ProductServiceType>()
+
+  const formMap: Record<ProductServiceType, ReactNode> = {
+    INVENTORY: <InventoryTypeForm closeCallback={closeCallback} />,
+    NON_INVENTORY: <NonInventoryTypeForm />,
+    INVENTORY_ASSEMBLY: <NonInventoryTypeForm />,
+    SERVICE: <ServiceTypeForm />,
+    BUNDLE: <BundleTypeForm />,
+  }
 
   function handleProducTypeChange(value: string) {
     setProductType(value as ProductServiceType)
@@ -50,7 +54,9 @@ export function ProductServiceForm() {
   return (
     <div>
       <div className="flex items-center justify-between px-4">
-        <span className="font-semibold">{productType} </span>
+        <span className="font-semibold capitalize">
+          {productType.toLowerCase()}{" "}
+        </span>
         <Button
           variant="link"
           onClick={() => {

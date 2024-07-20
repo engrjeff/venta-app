@@ -2,6 +2,7 @@
 
 import prisma from "@/prisma/client"
 import { createSupplierSchema } from "@/schema/supplier"
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { z } from "zod"
 
 import { authedProcedure } from "./procedures/auth"
@@ -37,5 +38,12 @@ export const createSupplier = authedProcedure
       })
 
       return result
-    } catch (error) {}
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case "P2002":
+            throw `${input.name} already exists.`
+        }
+      }
+    }
   })

@@ -3,6 +3,8 @@
 import { useUnits } from "@/hooks/useUnits"
 import { AppCombobox } from "@/components/shared/app-combobox"
 
+import { UnitConversionForm } from "./unit-conversion-form"
+
 export function UnitConversionPicker({
   unitId,
   value,
@@ -16,7 +18,7 @@ export function UnitConversionPicker({
 
   const unit = data?.find((u) => u.id === unitId)
 
-  const disabled = isLoading || !unit?.conversions?.length
+  const disabled = isLoading || !unitId
 
   return (
     <AppCombobox
@@ -31,6 +33,14 @@ export function UnitConversionPicker({
           label: item.name,
         })) ?? []
       }
+      renderEmpty={(search) => (
+        <UnitConversionForm
+          initialName={search}
+          onAfterSave={onValueChange}
+          unitName={unit?.name}
+          unitId={unitId}
+        />
+      )}
     />
   )
 }

@@ -25,7 +25,10 @@ function AppProviders({ children }: { children: ReactNode }) {
           <Toaster richColors position="top-right" />
         </ThemeProvider>
 
-        <ReactQueryDevtools initialIsOpen={false} />
+        <ReactQueryDevtools
+          initialIsOpen={false}
+          buttonPosition="bottom-left"
+        />
       </QueryClientProvider>
     </AuthProvider>
   )
