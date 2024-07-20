@@ -68,7 +68,17 @@ export function CategoryRowActions({ category }: Props) {
   return (
     <>
       <div className="flex items-center gap-4">
-        <Button size="sm" variant="link" onClick={() => setAction("edit")}>
+        <Button
+          disabled={category.status === ItemStatus.INACTIVE}
+          size="sm"
+          variant="link"
+          className={
+            category.status === ItemStatus.ACTIVE
+              ? "text-primary"
+              : "text-muted-foreground"
+          }
+          onClick={() => setAction("edit")}
+        >
           Edit
         </Button>
         <DropdownMenu>
