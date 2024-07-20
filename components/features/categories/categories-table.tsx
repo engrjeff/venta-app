@@ -4,7 +4,6 @@ import { Category } from "@prisma/client"
 import { ColumnDef } from "@tanstack/react-table"
 
 import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
 import { DataTable } from "@/components/ui/data-table/data-table"
 import { SortLink } from "@/components/ui/data-table/sort-link"
 import { useDataTable } from "@/components/ui/data-table/useDataTable"
@@ -15,23 +14,8 @@ import { CategoryRowActions } from "./category-row-actions"
 export const columns: ColumnDef<Category>[] = [
   {
     id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
+    header: ({ table }) => <span>#</span>,
+    cell: ({ row }) => <span>{row.index + 1}</span>,
     enableSorting: false,
     enableHiding: false,
   },
