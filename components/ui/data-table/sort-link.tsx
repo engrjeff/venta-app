@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useCallback } from "react"
+import { Suspense, useCallback, useState } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDownIcon } from "lucide-react"
@@ -25,28 +25,39 @@ function SortLinkComponent({ title, sortValue, className }: SortLinkProps) {
   const currentSort = searchParams.get(sortParamKey)
   const currentOrder = searchParams.get(orderParamKey)
 
+  const ORDERS = ["asc", "desc", null]
+
+  const [orderIndex, setOrderIndex] = useState(() =>
+    currentOrder ? ORDERS.indexOf(currentOrder) : 0
+  )
+
+  const order = ORDERS[orderIndex % 3]
+
   const createQueryString = useCallback(
-    (sort: string, order: string) => {
+    (sort: string) => {
       const params = new URLSearchParams(
         searchParams ? searchParams : undefined
       )
 
-      params.set(sortParamKey, sort)
-      params.set(orderParamKey, order)
+      if (order !== null) {
+        params.set(sortParamKey, sort)
+        params.set(orderParamKey, order)
+      } else {
+        params.delete(sortParamKey)
+        params.delete(orderParamKey)
+      }
 
       return params.toString()
     },
-    [searchParams]
+    [searchParams, order]
   )
 
   return (
     <div className={cn("flex items-center space-x-2", className)}>
       <Link
-        href={`${pathname}?${createQueryString(
-          sortValue,
-          currentOrder === "desc" ? "asc" : "desc"
-        )}`}
+        href={`${pathname}?${createQueryString(sortValue)}`}
         className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-8")}
+        onClick={() => setOrderIndex((c) => c + 1)}
       >
         <span>{title}</span>
         {currentSort === sortValue ? (
