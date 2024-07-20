@@ -3,6 +3,7 @@
 import { Category } from "@prisma/client"
 import { ColumnDef } from "@tanstack/react-table"
 
+import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DataTable } from "@/components/ui/data-table/data-table"
 import { SortLink } from "@/components/ui/data-table/sort-link"
@@ -41,6 +42,19 @@ export const columns: ColumnDef<Category>[] = [
     },
     cell: ({ row }) => (
       <div className="text-nowrap">{row.getValue("name")}</div>
+    ),
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => {
+      return <SortLink sortValue="status" title="Status" />
+    },
+    cell: ({ row }) => (
+      <Badge
+        variant={row.original.status === "ACTIVE" ? "default" : "destructive"}
+      >
+        {row.getValue("status")}
+      </Badge>
     ),
   },
   {
