@@ -21,7 +21,7 @@ export function ProductServiceForm({ closeCallback }: Props) {
 
   const formMap: Record<ProductServiceType, ReactNode> = {
     INVENTORY: <InventoryTypeForm closeCallback={closeCallback} />,
-    NON_INVENTORY: <NonInventoryTypeForm />,
+    NON_INVENTORY: <NonInventoryTypeForm closeCallback={closeCallback} />,
     INVENTORY_ASSEMBLY: <NonInventoryTypeForm />,
     SERVICE: <ServiceTypeForm />,
     BUNDLE: <BundleTypeForm />,
@@ -55,7 +55,7 @@ export function ProductServiceForm({ closeCallback }: Props) {
     <div>
       <div className="flex items-center justify-between px-4">
         <span className="font-semibold capitalize">
-          {productType.toLowerCase()}{" "}
+          {productType.replaceAll("_", " ").toLowerCase()}{" "}
         </span>
         <Button
           variant="link"

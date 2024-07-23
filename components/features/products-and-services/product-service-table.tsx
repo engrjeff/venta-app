@@ -61,7 +61,9 @@ export const columns: ColumnDef<ProductItem>[] = [
       return <SortLink sortValue="type" title="Type" />
     },
     cell: ({ row }) => (
-      <Badge className="capitalize">{row.original.type.toLowerCase()}</Badge>
+      <Badge className="capitalize" variant={row.original.type as any}>
+        {row.original.type.replaceAll("_", " ").toLowerCase()}
+      </Badge>
     ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))

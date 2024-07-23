@@ -6,6 +6,7 @@ import {
   copyProductSchema,
   inventoryCreateSchema,
   inventoryEditSchema,
+  productCreateSchema,
 } from "@/schema/product"
 import { appendCurrency } from "@/server/utils"
 import { ProductServiceStatus, ProductServiceType } from "@prisma/client"
@@ -118,6 +119,47 @@ export const createInventoryProduct = authedProcedure
           type: ProductServiceType.INVENTORY,
           ...input,
           asOfDate: input.asOfDate ? new Date(input.asOfDate) : undefined,
+        },
+        include: {
+          store: {
+            select: {
+              slug: true,
+            },
+          },
+        },
+      })
+
+      // revalidate here
+      revalidatePath(`/${result.store.slug}/items`)
+
+      return result
+    } catch (error) {
+      console.log(error)
+      if (error instanceof PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case "P2002":
+            if (
+              Array.isArray(error.meta?.target) &&
+              error.meta?.target.includes("sku")
+            ) {
+              throw `The SKU "${input.sku}" already exists.`
+            }
+            throw `${input.name} already exists.`
+        }
+      }
+    }
+  })
+
+export const createNonInventoryProduct = authedProcedure
+  .createServerAction()
+  .input(productCreateSchema.merge(withStoreId))
+  .handler(async ({ ctx, input }) => {
+    try {
+      const result = await prisma.productServiceItem.create({
+        data: {
+          ownerId: ctx.user.id,
+          type: ProductServiceType.NON_INVENTORY,
+          ...input,
         },
         include: {
           store: {

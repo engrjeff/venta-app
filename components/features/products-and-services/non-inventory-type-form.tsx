@@ -1,16 +1,15 @@
 "use client"
 
-import { ChevronDownIcon, PlusIcon } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { createNonInventoryProduct } from "@/actions/products"
+import { ProductCreateInput, productCreateSchema } from "@/schema/product"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { FieldErrors, useForm } from "react-hook-form"
+import { toast } from "sonner"
+import { useServerAction } from "zsa-react"
 
+import { useCurrentStore } from "@/hooks/useCurrentStore"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Form,
   FormControl,
@@ -20,26 +19,91 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { ImagePicker } from "@/components/ui/image-picker"
+import { Label } from "@/components/ui/label"
+import { NumberInput } from "@/components/ui/number-input"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 
-export function NonInventoryTypeForm() {
-  const form = useForm()
+import { CategorySelect } from "../categories/category-select"
+import { BookAccountsSelect } from "./book-accounts-select"
+import { SkuInput } from "./sku-input"
+import { SupplierSelect } from "./supplier-select"
 
-  function onSubmit() {}
+interface Props {
+  closeCallback?: () => void
+}
+
+export function NonInventoryTypeForm({ closeCallback }: Props) {
+  const store = useCurrentStore()
+
+  const form = useForm<ProductCreateInput>({
+    resolver: zodResolver(productCreateSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      sku: "",
+      cost: 0,
+      salesPriceOrRate: 0,
+      isSelling: true,
+    },
+  })
+
+  const createAction = useServerAction(createNonInventoryProduct)
+
+  const isBusy = createAction.isPending
+
+  const isSelling = form.watch("isSelling")
+  const isPurchasing = form.watch("isPurchasing")
+
+  function onError(errors: FieldErrors<ProductCreateInput>) {
+    console.log(errors)
+  }
+
+  async function onSubmit(
+    { image, ...values }: ProductCreateInput,
+    shouldClose?: boolean
+  ) {
+    try {
+      if (!store.data?.id) return
+
+      const [data, err] = await createAction.execute({
+        storeId: store.data.id,
+        ...values,
+      })
+
+      if (err) {
+        toast.error(err.message)
+        return
+      }
+
+      toast.success(`${data?.name} was saved!`)
+      form.reset()
+      if (shouldClose) {
+        // close form sheet
+        if (closeCallback) {
+          closeCallback()
+        }
+      }
+    } catch (error) {}
+  }
+
+  async function saveAndNew() {
+    const isValid = await form.trigger(undefined, { shouldFocus: true })
+
+    if (!isValid) return
+
+    const values = form.getValues()
+
+    await onSubmit(values, false)
+  }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <fieldset className="space-y-3 p-4">
+      <form
+        onSubmit={form.handleSubmit((data) => onSubmit(data, true), onError)}
+      >
+        <fieldset className="space-y-3 p-4" disabled={isBusy}>
           <div className="flex justify-between gap-8">
             <div className="flex-1 space-y-3">
               <FormField
@@ -74,7 +138,12 @@ export function NonInventoryTypeForm() {
                       SKU <span>*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="SKU" {...field} />
+                      <SkuInput
+                        placeholder="SKU"
+                        productName={form.watch("name")}
+                        {...field}
+                        onValueChange={field.onChange}
+                      />
                     </FormControl>
                     <FormDescription>Generate or type manually</FormDescription>
                     <FormMessage />
@@ -82,29 +151,37 @@ export function NonInventoryTypeForm() {
                 )}
               />
             </div>
-            <div className="w-32">Image here</div>
+            <div className="w-32">
+              <FormField
+                name="image"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Image</FormLabel>
+                    <FormControl>
+                      <ImagePicker
+                        urlValue={field.value}
+                        onValueChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
           <FormField
             control={form.control}
-            name="category"
+            name="categoryId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="category1">Category 1</SelectItem>
-                    <SelectItem value="category2">Category 2</SelectItem>
-                    <SelectItem value="category3">Category 3</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <CategorySelect
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  />
+                </FormControl>
                 <FormDescription>
                   A way to classify product items.
                 </FormDescription>
@@ -114,200 +191,213 @@ export function NonInventoryTypeForm() {
           />
 
           <Separator />
+
+          <Label className="mt-6 inline-block">Description</Label>
           <FormField
-            name="description"
             control={form.control}
+            name="isSelling"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="desc_i_sell_this" />
-                  <label
-                    htmlFor="desc_i_sell_this"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked)
+
+                      if (!checked && !isPurchasing) {
+                        form.setValue("isPurchasing", true)
+                      }
+                    }}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
                     I sell this product/service to my customers.
-                  </label>
+                  </FormLabel>
                 </div>
-                <FormControl>
-                  <Textarea
-                    placeholder="Description on sales form"
-                    className="min-h-[60px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              name="sales_price_rate"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sales price/rate</FormLabel>
-                  <FormControl>
-                    <Input placeholder="100" type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="inventory_asset_account"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Income Account</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+
+          {isSelling ? (
+            <>
+              <FormField
+                name="description"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="sr-only">Description</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Income Account" />
-                      </SelectTrigger>
+                      <Textarea
+                        placeholder="Description on sales form"
+                        className="min-h-[60px]"
+                        {...field}
+                      />
                     </FormControl>
-                    <SelectContent>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="mb-1 w-full justify-start"
-                      >
-                        <PlusIcon className="mr-3 size-4" /> Add new
-                      </Button>
-                      <SelectItem value="1">Sales of Product Income</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <Separator />
-          <FormField
-            name="purchasing_description"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Purchasing Information</FormLabel>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="i_purchase_this" />
-                  <label
-                    htmlFor="i_purchase_this"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    I purchase this product/service from a supplier.
-                  </label>
-                </div>
-                <FormControl>
-                  <Textarea
-                    placeholder="Description on purchase forms"
-                    className="min-h-[60px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              name="cost"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cost</FormLabel>
-                  <FormControl>
-                    <Input placeholder="100" type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="expense_account"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Expense Account</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Expense Account" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="mb-1 w-full justify-start"
-                      >
-                        <PlusIcon className="mr-3 size-4" /> Add new
-                      </Button>
-                      <SelectItem value="1">Cost of sales</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              name="preferred_supplier"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Preferred Supplier</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  name="salesPriceOrRate"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sales price/rate</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select preferred supplier" />
-                        </SelectTrigger>
+                        <NumberInput
+                          placeholder="0"
+                          min={0}
+                          {...form.register("salesPriceOrRate", {
+                            valueAsNumber: true,
+                          })}
+                        />
                       </FormControl>
-                      <SelectContent>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="mb-1 w-full justify-start"
-                        >
-                          <PlusIcon className="mr-3 size-4" /> Add new
-                        </Button>
-                        <SelectItem value="1">Supplier 1</SelectItem>
-                        <SelectItem value="2">Supplier 2</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="incomeAccountId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Income Account</FormLabel>
+                      <FormControl>
+                        <BookAccountsSelect
+                          accountLabel="INCOME"
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </>
+          ) : null}
+          <Separator />
+          <Label className="mt-6 inline-block">Purchasing Information</Label>
+          <FormField
+            control={form.control}
+            name="isPurchasing"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked)
+
+                      if (!checked && !isSelling) {
+                        form.setValue("isSelling", true)
+                      }
+                    }}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    I purchase this product/service from a supplier.
+                  </FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+          {isPurchasing ? (
+            <>
+              <FormField
+                name="purchasingDescription"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="sr-only">
+                      Purchasing Information
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Description on purchase forms"
+                        className="min-h-[60px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  name="cost"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cost</FormLabel>
+                      <FormControl>
+                        <NumberInput
+                          placeholder="0"
+                          min={0}
+                          {...form.register("cost", {
+                            valueAsNumber: true,
+                          })}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="expenseAccountId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Expense Account</FormLabel>
+                      <FormControl>
+                        <BookAccountsSelect
+                          accountLabel="EXPENSE"
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="supplierId"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Preferred Supplier</FormLabel>
+                      <FormControl>
+                        <SupplierSelect
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </>
+          ) : null}
         </fieldset>
 
         <div className="sticky bottom-0 border-t bg-background p-4">
-          <div className="flex items-center justify-end divide-x divide-white/10">
-            <Button type="submit" size="sm" className="rounded-r-none">
+          <div className="flex items-center justify-end gap-3">
+            <Button type="submit" size="sm" loading={isBusy}>
+              Save and Close
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={saveAndNew}
+              loading={isBusy}
+            >
               Save and New
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="icon" className="size-9 rounded-l-none">
-                  <span className="sr-only">click for more</span>{" "}
-                  <ChevronDownIcon className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Save and Close</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </form>
