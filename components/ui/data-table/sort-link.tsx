@@ -25,7 +25,7 @@ function SortLinkComponent({ title, sortValue, className }: SortLinkProps) {
   const currentSort = searchParams.get(sortParamKey)
   const currentOrder = searchParams.get(orderParamKey)
 
-  const ORDERS = ["asc", "desc", null]
+  const ORDERS = ["desc", "asc", null]
 
   const [orderIndex, setOrderIndex] = useState(() =>
     currentOrder ? ORDERS.indexOf(currentOrder) : 0
