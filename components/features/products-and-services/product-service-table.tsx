@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense } from "react"
-import { ProductItems } from "@/actions/products"
+import { ProductItem } from "@/actions/products"
 import { ColumnDef } from "@tanstack/react-table"
 
 import { Badge } from "@/components/ui/badge"
@@ -15,8 +15,6 @@ import { SearchField } from "@/components/shared/search-field"
 
 import { PRODUCT_STATUS_OPTIONS } from "./data"
 import { ProductRowActions } from "./product-row-actions"
-
-type ProductItem = ProductItems["items"][number]
 
 export const columns: ColumnDef<ProductItem>[] = [
   {
@@ -119,13 +117,7 @@ export const columns: ColumnDef<ProductItem>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      return (
-        <ProductRowActions
-          productId={row.original.id}
-          productName={row.original.name}
-          productStatus={row.original.status}
-        />
-      )
+      return <ProductRowActions product={row.original} />
     },
   },
 ]

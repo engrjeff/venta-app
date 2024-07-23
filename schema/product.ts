@@ -65,6 +65,11 @@ export const copyProductSchema = inventoryCreateSchema
     productToCopyId: z.string(),
   })
 
+export const inventoryEditSchema = inventoryCreateSchema.extend({
+  type: z.literal("inventory"),
+  id: z.string(),
+})
+
 export type ProductCreateInput = z.infer<typeof productCreateSchema>
 
 export type InventoryCreateInput = z.infer<typeof inventoryCreateSchema>

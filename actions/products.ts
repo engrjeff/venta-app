@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache"
 import prisma from "@/prisma/client"
-import { copyProductSchema, inventoryCreateSchema } from "@/schema/product"
+import {
+  copyProductSchema,
+  inventoryCreateSchema,
+  inventoryEditSchema,
+} from "@/schema/product"
 import { appendCurrency } from "@/server/utils"
 import { ProductServiceStatus, ProductServiceType } from "@prisma/client"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
@@ -65,7 +69,13 @@ export const getProductServiceItems = authedProcedure
       }))
 
       const total = await prisma.productServiceItem.count({
-        where: { storeId: input.storeId },
+        where: {
+          storeId: input.storeId,
+          status:
+            input.status === "inactive"
+              ? ProductServiceStatus.INACTIVE
+              : ProductServiceStatus.ACTIVE,
+        },
       })
 
       const pageInfo = {
@@ -215,11 +225,11 @@ export const updateProductStatus = authedProcedure
   .input(changeStatusSchema)
   .handler(async ({ ctx, input }) => {
     try {
-      const category = await prisma.productServiceItem.findUnique({
+      const product = await prisma.productServiceItem.findUnique({
         where: { id: input.id },
       })
 
-      if (!category) throw `Cannot find product/service with ID ${input.id}`
+      if (!product) throw `Cannot find product/service with ID ${input.id}`
 
       const result = await prisma.productServiceItem.update({
         where: {
@@ -243,5 +253,59 @@ export const updateProductStatus = authedProcedure
       return result
     } catch (error) {
       if (typeof error === "string") throw error
+    }
+  })
+
+export const updateProduct = authedProcedure
+  .createServerAction()
+  .input(z.discriminatedUnion("type", [inventoryEditSchema]))
+  .handler(async ({ ctx, input }) => {
+    try {
+      const product = await prisma.productServiceItem.findUnique({
+        where: { id: input.id },
+      })
+
+      if (!product) throw `Cannot find product/service with ID ${input.id}`
+
+      const { type, id, ...fields } = input
+
+      const result = await prisma.productServiceItem.update({
+        where: {
+          id,
+        },
+        data: {
+          ...fields,
+          asOfDate: fields.asOfDate ? new Date(fields.asOfDate) : undefined,
+        },
+        include: {
+          store: {
+            select: {
+              slug: true,
+            },
+          },
+        },
+      })
+
+      // revalidate here
+      revalidatePath(`/${result.store.slug}/items`)
+
+      return result
+    } catch (error) {
+      console.log(error)
+
+      if (typeof error === "string") throw error
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case "P2002":
+            if (
+              Array.isArray(error.meta?.target) &&
+              error.meta?.target.includes("sku")
+            ) {
+              throw `The SKU "${input.sku}" already exists.`
+            }
+            throw `Product name ${input.name} already exists.`
+        }
+      }
     }
   })

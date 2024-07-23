@@ -1,7 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { copyProductAction, updateProductStatus } from "@/actions/products"
+import {
+  copyProductAction,
+  ProductItem,
+  updateProductStatus,
+} from "@/actions/products"
 import { CopyProductInput, copyProductSchema } from "@/schema/product"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ProductServiceStatus } from "@prisma/client"
@@ -46,32 +50,41 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 
+import { EditProductServiceForm } from "./edit-product-service-form"
 import { SkuInput } from "./sku-input"
 
 interface Props {
-  productId: string
-  productName: string
-  productStatus: ProductServiceStatus
+  product: ProductItem
 }
 
 interface PropsWithCallback extends Props {
   afterSave: () => void
 }
 
-type RowAction = "copy" | "change-status" | "delete"
+type RowAction = "edit" | "copy" | "change-status" | "delete"
 
-export function ProductRowActions(props: Props) {
+export function ProductRowActions({ product }: Props) {
   const [action, setAction] = useState<RowAction>()
 
   const updateStatusAction = useServerAction(updateProductStatus)
 
+  function resetAction() {
+    setAction(undefined)
+  }
+
   async function handleUpdateStatus() {
     try {
       const [data, err] = await updateStatusAction.execute({
-        id: props.productId,
+        id: product.id,
         status:
-          props.productStatus === ProductServiceStatus.ACTIVE
+          product.status === ProductServiceStatus.ACTIVE
             ? ProductServiceStatus.INACTIVE
             : ProductServiceStatus.ACTIVE,
       })
@@ -88,7 +101,7 @@ export function ProductRowActions(props: Props) {
   return (
     <>
       <div className="flex items-center gap-4">
-        <Button size="sm" variant="link">
+        <Button size="sm" variant="link" onClick={() => setAction("edit")}>
           Edit
         </Button>
         <DropdownMenu>
@@ -101,7 +114,7 @@ export function ProductRowActions(props: Props) {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => setAction("change-status")}>
-              {props.productStatus === ProductServiceStatus.ACTIVE
+              {product.status === ProductServiceStatus.ACTIVE
                 ? "Make Inactive"
                 : "Make Active"}
             </DropdownMenuItem>
@@ -122,7 +135,7 @@ export function ProductRowActions(props: Props) {
       <Dialog
         open={action === "copy"}
         onOpenChange={(isOpen) => {
-          if (!isOpen) setAction(undefined)
+          if (!isOpen) resetAction()
         }}
       >
         <DialogPortal>
@@ -133,10 +146,7 @@ export function ProductRowActions(props: Props) {
             <DialogHeader>
               <DialogTitle>Copy Product</DialogTitle>
             </DialogHeader>
-            <ProductCopyForm
-              {...props}
-              afterSave={() => setAction(undefined)}
-            />
+            <ProductCopyForm product={product} afterSave={resetAction} />
           </DialogContent>
         </DialogPortal>
       </Dialog>
@@ -144,7 +154,7 @@ export function ProductRowActions(props: Props) {
       <AlertDialog
         open={action === "change-status"}
         onOpenChange={(isOpen) => {
-          if (!isOpen) setAction(undefined)
+          if (!isOpen) resetAction()
         }}
       >
         <AlertDialogContent>
@@ -152,8 +162,8 @@ export function ProductRowActions(props: Props) {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This will make{" "}
-              <strong className="text-primary">{props.productName}</strong>{" "}
-              {props.productStatus === ProductServiceStatus.ACTIVE
+              <strong className="text-primary">{product.name}</strong>{" "}
+              {product.status === ProductServiceStatus.ACTIVE
                 ? `inactive. You will not be able to use this category unless you
               make it Active again.`
                 : "active again."}
@@ -167,20 +177,38 @@ export function ProductRowActions(props: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Sheet
+        open={action === "edit"}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) resetAction()
+        }}
+      >
+        <SheetContent
+          onInteractOutside={(e) => {
+            e.preventDefault()
+          }}
+          className="overflow-y-auto p-0 sm:max-w-xl"
+        >
+          <SheetHeader className="border-b p-4">
+            <SheetTitle>Edit {product.name}</SheetTitle>
+          </SheetHeader>
+          <EditProductServiceForm
+            product={product}
+            closeCallback={resetAction}
+          />
+        </SheetContent>
+      </Sheet>
     </>
   )
 }
 
-function ProductCopyForm({
-  productId,
-  productName,
-  afterSave,
-}: PropsWithCallback) {
+function ProductCopyForm({ product, afterSave }: PropsWithCallback) {
   const form = useForm<CopyProductInput>({
     resolver: zodResolver(copyProductSchema),
     defaultValues: {
-      productToCopyId: productId,
-      name: productName + " - Copy",
+      productToCopyId: product.id,
+      name: product.name + " - Copy",
       sku: "",
     },
   })
