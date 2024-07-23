@@ -1,15 +1,26 @@
 "use client"
 
 import { useState } from "react"
-import { copyProductAction } from "@/actions/products"
+import { copyProductAction, updateProductStatus } from "@/actions/products"
 import { CopyProductInput, copyProductSchema } from "@/schema/product"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ProductServiceStatus } from "@prisma/client"
 import { DialogClose } from "@radix-ui/react-dialog"
 import { MoreHorizontal } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { useServerAction } from "zsa-react"
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -41,16 +52,38 @@ import { SkuInput } from "./sku-input"
 interface Props {
   productId: string
   productName: string
+  productStatus: ProductServiceStatus
 }
 
 interface PropsWithCallback extends Props {
   afterSave: () => void
 }
 
-type RowAction = "copy" | "make-inactive" | "delete"
+type RowAction = "copy" | "change-status" | "delete"
 
 export function ProductRowActions(props: Props) {
   const [action, setAction] = useState<RowAction>()
+
+  const updateStatusAction = useServerAction(updateProductStatus)
+
+  async function handleUpdateStatus() {
+    try {
+      const [data, err] = await updateStatusAction.execute({
+        id: props.productId,
+        status:
+          props.productStatus === ProductServiceStatus.ACTIVE
+            ? ProductServiceStatus.INACTIVE
+            : ProductServiceStatus.ACTIVE,
+      })
+
+      if (err) {
+        toast.error(err.message)
+        return
+      }
+
+      toast.success(`Product/Service status updated!`)
+    } catch (error) {}
+  }
 
   return (
     <>
@@ -67,7 +100,11 @@ export function ProductRowActions(props: Props) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Make Inactive</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setAction("change-status")}>
+              {props.productStatus === ProductServiceStatus.ACTIVE
+                ? "Make Inactive"
+                : "Make Active"}
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setAction("copy")}>
               Make a Copy
             </DropdownMenuItem>
@@ -103,6 +140,33 @@ export function ProductRowActions(props: Props) {
           </DialogContent>
         </DialogPortal>
       </Dialog>
+
+      <AlertDialog
+        open={action === "change-status"}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setAction(undefined)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will make{" "}
+              <strong className="text-primary">{props.productName}</strong>{" "}
+              {props.productStatus === ProductServiceStatus.ACTIVE
+                ? `inactive. You will not be able to use this category unless you
+              make it Active again.`
+                : "active again."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction type="button" onClick={handleUpdateStatus}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

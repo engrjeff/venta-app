@@ -1,19 +1,19 @@
 "use client"
 
+import { Suspense } from "react"
 import { ProductItems } from "@/actions/products"
 import { ColumnDef } from "@tanstack/react-table"
-import { XIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DataTable } from "@/components/ui/data-table/data-table"
-import { DataTableFacetedFilter } from "@/components/ui/data-table/faceted-filter"
+import { DropdownFilterLinks } from "@/components/ui/data-table/dropdown-filter-links"
+import { FilterResetLink } from "@/components/ui/data-table/filter-reset-link"
 import { SortLink } from "@/components/ui/data-table/sort-link"
 import { useDataTable } from "@/components/ui/data-table/useDataTable"
 import { Input } from "@/components/ui/input"
 
-import { PRODUCT_TYPES } from "./data"
+import { PRODUCT_STATUS_OPTIONS } from "./data"
 import { ProductRowActions } from "./product-row-actions"
 
 type ProductItem = ProductItems["items"][number]
@@ -123,6 +123,7 @@ export const columns: ColumnDef<ProductItem>[] = [
         <ProductRowActions
           productId={row.original.id}
           productName={row.original.name}
+          productStatus={row.original.status}
         />
       )
     },
@@ -149,7 +150,16 @@ export function ProductServiceTable({ products }: ProductServiceTableProps) {
           }
           className="h-8 max-w-xs"
         />
-        {table.getColumn("type") && (
+        <Suspense>
+          <DropdownFilterLinks
+            paramKey="status"
+            title="Status"
+            options={PRODUCT_STATUS_OPTIONS}
+          />
+          <FilterResetLink />
+        </Suspense>
+
+        {/* {table.getColumn("type") && (
           <DataTableFacetedFilter
             column={table.getColumn("type")}
             title="Type"
@@ -165,7 +175,7 @@ export function ProductServiceTable({ products }: ProductServiceTableProps) {
             Reset
             <XIcon className="ml-2 size-4" />
           </Button>
-        )}
+        )} */}
       </div>
       <DataTable table={table} columnLength={columns.length} />
     </div>

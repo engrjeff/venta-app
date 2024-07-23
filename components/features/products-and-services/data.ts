@@ -22,3 +22,14 @@ export const PRODUCT_TYPES = [
     value: ProductServiceType.BUNDLE,
   },
 ]
+
+export const PRODUCT_STATUS_OPTIONS = [
+  {
+    label: "Active",
+    value: "active",
+  },
+  {
+    label: "Inactive",
+    value: "inactive",
+  },
+]

@@ -4,17 +4,22 @@ import { revalidatePath } from "next/cache"
 import prisma from "@/prisma/client"
 import { copyProductSchema, inventoryCreateSchema } from "@/schema/product"
 import { appendCurrency } from "@/server/utils"
-import { ProductServiceType } from "@prisma/client"
+import { ProductServiceStatus, ProductServiceType } from "@prisma/client"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import pluralize from "pluralize"
+import { z } from "zod"
 
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, getSkip } from "./config"
 import { authedProcedure } from "./procedures/auth"
-import { withPaginationAndSort, withStoreId } from "./types"
+import { changeStatusSchema, withPaginationAndSort, withStoreId } from "./types"
 
 export const getProductServiceItems = authedProcedure
   .createServerAction()
-  .input(withStoreId.merge(withPaginationAndSort))
+  .input(
+    withStoreId
+      .merge(withPaginationAndSort)
+      .extend({ status: z.string().default("true") })
+  )
   .handler(async ({ ctx, input }) => {
     try {
       const pageSize = input.limit ?? DEFAULT_PAGE_SIZE
@@ -23,6 +28,10 @@ export const getProductServiceItems = authedProcedure
         where: {
           ownerId: ctx.user.id,
           storeId: input.storeId,
+          status:
+            input.status === "inactive"
+              ? ProductServiceStatus.INACTIVE
+              : ProductServiceStatus.ACTIVE,
         },
         include: {
           unit: {
@@ -189,5 +198,41 @@ export const copyProductAction = authedProcedure
             throw `Product name ${input.name} already exists.`
         }
       }
+    }
+  })
+
+export const updateProductStatus = authedProcedure
+  .createServerAction()
+  .input(changeStatusSchema)
+  .handler(async ({ ctx, input }) => {
+    try {
+      const category = await prisma.productServiceItem.findUnique({
+        where: { id: input.id },
+      })
+
+      if (!category) throw `Cannot find product/service with ID ${input.id}`
+
+      const result = await prisma.productServiceItem.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          status: input.status,
+        },
+        include: {
+          store: {
+            select: {
+              slug: true,
+            },
+          },
+        },
+      })
+
+      // revalidate here
+      revalidatePath(`/${result.store.slug}/items`)
+
+      return result
+    } catch (error) {
+      if (typeof error === "string") throw error
     }
   })

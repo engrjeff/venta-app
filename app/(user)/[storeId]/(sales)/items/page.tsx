@@ -36,6 +36,7 @@ async function ProductsAndServicesPage({ params, searchParams }: PageProps) {
     page: isNaN(+searchParams.p) ? 1 : Number(searchParams.p),
     sort: searchParams.sort,
     order: searchParams.order,
+    status: searchParams.status,
   })
 
   return (
