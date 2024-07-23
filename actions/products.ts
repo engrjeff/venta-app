@@ -16,9 +16,10 @@ import { changeStatusSchema, withPaginationAndSort, withStoreId } from "./types"
 export const getProductServiceItems = authedProcedure
   .createServerAction()
   .input(
-    withStoreId
-      .merge(withPaginationAndSort)
-      .extend({ status: z.string().default("true") })
+    withStoreId.merge(withPaginationAndSort).extend({
+      status: z.string().default("true"),
+      search: z.string().optional(),
+    })
   )
   .handler(async ({ ctx, input }) => {
     try {
@@ -32,6 +33,10 @@ export const getProductServiceItems = authedProcedure
             input.status === "inactive"
               ? ProductServiceStatus.INACTIVE
               : ProductServiceStatus.ACTIVE,
+          name: {
+            contains: input.search,
+            mode: "insensitive",
+          },
         },
         include: {
           unit: {

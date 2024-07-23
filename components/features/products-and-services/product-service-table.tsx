@@ -11,7 +11,7 @@ import { DropdownFilterLinks } from "@/components/ui/data-table/dropdown-filter-
 import { FilterResetLink } from "@/components/ui/data-table/filter-reset-link"
 import { SortLink } from "@/components/ui/data-table/sort-link"
 import { useDataTable } from "@/components/ui/data-table/useDataTable"
-import { Input } from "@/components/ui/input"
+import { SearchField } from "@/components/shared/search-field"
 
 import { PRODUCT_STATUS_OPTIONS } from "./data"
 import { ProductRowActions } from "./product-row-actions"
@@ -137,20 +137,11 @@ interface ProductServiceTableProps {
 export function ProductServiceTable({ products }: ProductServiceTableProps) {
   const table = useDataTable({ data: products ?? [], columns })
 
-  const isFiltered = table.getState().columnFilters.length > 0
-
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center space-x-2">
-        <Input
-          placeholder="Search products"
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="h-8 max-w-xs"
-        />
         <Suspense>
+          <SearchField placeholder="Search products" />
           <DropdownFilterLinks
             paramKey="status"
             title="Status"

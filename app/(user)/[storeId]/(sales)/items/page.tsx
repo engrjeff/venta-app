@@ -37,6 +37,7 @@ async function ProductsAndServicesPage({ params, searchParams }: PageProps) {
     sort: searchParams.sort,
     order: searchParams.order,
     status: searchParams.status,
+    search: searchParams.search,
   })
 
   return (

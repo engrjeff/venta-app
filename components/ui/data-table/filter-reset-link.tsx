@@ -6,7 +6,7 @@ import { XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-const NON_FILTER_PARAMS = ["p", "sort", "order"]
+const NON_FILTER_PARAMS = ["p", "sort", "order", "search"]
 
 function getFilterParamsCount(paramsObject: Record<string, string>) {
   let count = 0
