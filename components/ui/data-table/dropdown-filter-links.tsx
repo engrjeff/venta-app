@@ -69,7 +69,7 @@ export function DropdownFilterLinks({
           ) : null}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-40" align="end">
+      <DropdownMenuContent className="w-40" align="start">
         <DropdownMenuLabel>Filter by {title}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {options.map((option) => (
