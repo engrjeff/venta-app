@@ -52,6 +52,8 @@ export const getProductServiceItems = authedProcedure
 
       const items = result?.map((item) => ({
         ...item,
+        rawCost: item.cost,
+        rawSalesOrPrice: item.salesPriceOrRate,
         cost: appendCurrency(item.cost),
         salesPriceOrRate: appendCurrency(item.salesPriceOrRate),
         unit: item.unit
@@ -92,6 +94,8 @@ export const getProductServiceItems = authedProcedure
 export type ProductItems = NonNullable<
   Awaited<ReturnType<typeof getProductServiceItems>>["0"]
 >
+
+export type ProductItem = ProductItems["items"][number]
 
 export const createInventoryProduct = authedProcedure
   .createServerAction()
