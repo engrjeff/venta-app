@@ -61,9 +61,9 @@ export function DropdownFilterLinks({
               <Separator orientation="vertical" className="mx-2 h-4" />
               <Badge
                 variant="secondary"
-                className="rounded-sm px-1 font-normal"
+                className="rounded-sm px-1 font-normal capitalize"
               >
-                {currentValue}
+                {currentValue.replaceAll("_", " ").toLowerCase()}
               </Badge>
             </>
           ) : null}
