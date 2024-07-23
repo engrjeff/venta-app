@@ -70,6 +70,11 @@ export const inventoryEditSchema = inventoryCreateSchema.extend({
   id: z.string(),
 })
 
+export const nonInventoryEditSchema = productCreateSchema.extend({
+  type: z.literal("non-inventory"),
+  id: z.string(),
+})
+
 export type ProductCreateInput = z.infer<typeof productCreateSchema>
 
 export type InventoryCreateInput = z.infer<typeof inventoryCreateSchema>

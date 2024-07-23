@@ -6,6 +6,7 @@ import {
   copyProductSchema,
   inventoryCreateSchema,
   inventoryEditSchema,
+  nonInventoryEditSchema,
   productCreateSchema,
 } from "@/schema/product"
 import { appendCurrency } from "@/server/utils"
@@ -307,7 +308,9 @@ export const updateProductStatus = authedProcedure
 
 export const updateProduct = authedProcedure
   .createServerAction()
-  .input(z.discriminatedUnion("type", [inventoryEditSchema]))
+  .input(
+    z.discriminatedUnion("type", [inventoryEditSchema, nonInventoryEditSchema])
+  )
   .handler(async ({ ctx, input }) => {
     try {
       const product = await prisma.productServiceItem.findUnique({
@@ -316,16 +319,26 @@ export const updateProduct = authedProcedure
 
       if (!product) throw `Cannot find product/service with ID ${input.id}`
 
-      const { type, id, ...fields } = input
+      const { type, id, ...properties } = input
+
+      let fields = {}
+
+      if (input.type === "inventory") {
+        fields = {
+          ...properties,
+          asOfDate: input.asOfDate ? new Date(input.asOfDate) : undefined,
+        }
+      }
+
+      if (input.type === "non-inventory") {
+        fields = properties
+      }
 
       const result = await prisma.productServiceItem.update({
         where: {
           id,
         },
-        data: {
-          ...fields,
-          asOfDate: fields.asOfDate ? new Date(fields.asOfDate) : undefined,
-        },
+        data: fields,
         include: {
           store: {
             select: {
