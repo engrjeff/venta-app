@@ -3,6 +3,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getProductServiceItems } from "@/actions/products"
 import { getStoreBySlug } from "@/actions/stores"
+import { ProductServiceType } from "@prisma/client"
 
 import { PaginationLinks } from "@/components/ui/data-table/pagination-links"
 import { MoreDropDown } from "@/components/features/products-and-services/more-dropdown"
@@ -38,6 +39,7 @@ async function ProductsAndServicesPage({ params, searchParams }: PageProps) {
     order: searchParams.order,
     status: searchParams.status,
     search: searchParams.search,
+    type: searchParams.type as ProductServiceType,
   })
 
   return (

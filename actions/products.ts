@@ -24,6 +24,7 @@ export const getProductServiceItems = authedProcedure
     withStoreId.merge(withPaginationAndSort).extend({
       status: z.string().default("true"),
       search: z.string().optional(),
+      type: z.nativeEnum(ProductServiceType).optional(),
     })
   )
   .handler(async ({ ctx, input }) => {
@@ -42,6 +43,7 @@ export const getProductServiceItems = authedProcedure
             contains: input.search,
             mode: "insensitive",
           },
+          type: input.type,
         },
         include: {
           unit: {
@@ -76,6 +78,11 @@ export const getProductServiceItems = authedProcedure
             input.status === "inactive"
               ? ProductServiceStatus.INACTIVE
               : ProductServiceStatus.ACTIVE,
+          name: {
+            contains: input.search,
+            mode: "insensitive",
+          },
+          type: input.type,
         },
       })
 

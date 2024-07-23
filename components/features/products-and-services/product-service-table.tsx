@@ -13,7 +13,7 @@ import { SortLink } from "@/components/ui/data-table/sort-link"
 import { useDataTable } from "@/components/ui/data-table/useDataTable"
 import { SearchField } from "@/components/shared/search-field"
 
-import { PRODUCT_STATUS_OPTIONS } from "./data"
+import { PRODUCT_STATUS_OPTIONS, PRODUCT_TYPES } from "./data"
 import { ProductRowActions } from "./product-row-actions"
 
 export const columns: ColumnDef<ProductItem>[] = [
@@ -136,6 +136,11 @@ export function ProductServiceTable({ products }: ProductServiceTableProps) {
       <div className="flex items-center space-x-2">
         <Suspense>
           <SearchField placeholder="Search products" />
+          <DropdownFilterLinks
+            paramKey="type"
+            title="Type"
+            options={PRODUCT_TYPES}
+          />
           <DropdownFilterLinks
             paramKey="status"
             title="Status"
