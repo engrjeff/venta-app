@@ -7,7 +7,6 @@ import { FieldErrors, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { useServerAction } from "zsa-react"
 
-import { useCurrentStore } from "@/hooks/useCurrentStore"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -36,8 +35,6 @@ interface Props {
 }
 
 export function NonInventoryTypeEditForm({ closeCallback, product }: Props) {
-  const store = useCurrentStore()
-
   const form = useForm<ProductCreateInput>({
     resolver: zodResolver(productCreateSchema),
     mode: "onChange",
