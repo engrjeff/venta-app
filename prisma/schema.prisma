@@ -188,7 +188,6 @@ enum ProductServiceType {
   NON_INVENTORY
   INVENTORY_ASSEMBLY
   SERVICE
-  BUNDLE
 }
 
 model ProductServiceItem {

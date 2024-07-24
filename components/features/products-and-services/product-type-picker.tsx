@@ -16,11 +16,6 @@ const productItemTypes: Array<{
     type: "INVENTORY",
   },
   {
-    name: "Inventory Assembly",
-    description: "Products you buy and/or sell that you track quantities of.",
-    type: "INVENTORY_ASSEMBLY",
-  },
-  {
     name: "Non-inventory",
     description:
       "Products you buy and/or sell but don't need to (or can't) track quantities of.",
@@ -32,10 +27,10 @@ const productItemTypes: Array<{
     type: "SERVICE",
   },
   {
-    name: "Bundle",
+    name: "Inventory Assembly",
     description:
       "A collection of products and/or services that you sell together.",
-    type: "BUNDLE",
+    type: "INVENTORY_ASSEMBLY",
   },
 ]
 

@@ -17,10 +17,6 @@ export const PRODUCT_TYPES = [
     label: "Service",
     value: ProductServiceType.SERVICE,
   },
-  {
-    label: "Bundle",
-    value: ProductServiceType.BUNDLE,
-  },
 ]
 
 export const PRODUCT_STATUS_OPTIONS = [
