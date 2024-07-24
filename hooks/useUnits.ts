@@ -12,5 +12,11 @@ export function useUnits() {
     input: { storeId: store.data?.id! },
     queryKey: ["getStoreUnits", store.data?.slug!],
     enabled: Boolean(store.data?.id),
+    select(data) {
+      return {
+        ...data,
+        items: data?.items?.filter((d) => d.status === "ACTIVE"),
+      }
+    },
   })
 }
