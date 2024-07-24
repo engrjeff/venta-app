@@ -21,6 +21,8 @@ const badgeVariants = cva(
           "border-transparent bg-sky-500 text-primary-foreground hover:bg-sky-500/80",
         SERVICE:
           "border-transparent bg-green-600 text-primary-foreground hover:bg-green-600/80",
+        INVENTORY_ASSEMBLY:
+          "border-transparent bg-purple-600 text-primary-foreground hover:bg-purple-600/80",
       },
     },
     defaultVariants: {

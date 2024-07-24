@@ -23,7 +23,7 @@ export function ProductServiceForm({ closeCallback }: Props) {
     INVENTORY: <InventoryTypeForm closeCallback={closeCallback} />,
     NON_INVENTORY: <NonInventoryTypeForm closeCallback={closeCallback} />,
     SERVICE: <ServiceTypeForm closeCallback={closeCallback} />,
-    INVENTORY_ASSEMBLY: <BundleTypeForm />,
+    INVENTORY_ASSEMBLY: <BundleTypeForm closeCallback={closeCallback} />,
   }
 
   function handleProducTypeChange(value: string) {

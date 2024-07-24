@@ -15,6 +15,11 @@ export const QueryKeyFactory = createServerActionsKeyFactory({
     label,
     slug,
   ],
+  getProductServiceOptions: (slug: string, search: string) => [
+    "getProductServiceOptions",
+    slug,
+    search,
+  ],
 })
 
 const {

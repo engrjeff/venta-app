@@ -53,6 +53,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
+    "downshift": "^9.0.6",
     "embla-carousel-react": "^8.0.2",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.376.0",

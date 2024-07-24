@@ -22,7 +22,9 @@ export const productCreateSchema = z.object({
 
   description: z.string().optional(),
 
-  salesPriceOrRate: z.number().optional(),
+  salesPriceOrRate: z
+    .number({ message: "Invalid sales price/rate." })
+    .optional(),
 
   inventoryAssetAccountId: z.string().optional(),
   incomeAccountId: z.string().optional(),
@@ -30,7 +32,7 @@ export const productCreateSchema = z.object({
 
   purchasingDescription: z.string().optional(),
 
-  cost: z.number().optional(),
+  cost: z.number({ message: "Invalid cost." }).optional(),
 
   isSelling: z.boolean().optional(),
   isPurchasing: z.boolean().optional(),
@@ -40,7 +42,7 @@ export const productCreateSchema = z.object({
 
 export const inventoryCreateSchema = productCreateSchema.extend({
   initialQuantity: z
-    .number()
+    .number({ message: "Invalid quantity." })
     .int({ message: "Must be a whole number." })
     .positive({ message: "Must be greater than 0" })
     .optional(),
@@ -50,7 +52,7 @@ export const inventoryCreateSchema = productCreateSchema.extend({
     .min(10, { message: "Required." }),
 
   reorderPoint: z
-    .number()
+    .number({ message: "Invalid value." })
     .int({ message: "Must be a whole number." })
     .positive({ message: "Must be greater than 0" })
     .optional(),
@@ -58,6 +60,22 @@ export const inventoryCreateSchema = productCreateSchema.extend({
 
 export const serviceCreateSchema = productCreateSchema.extend({
   sku: z.string().optional(),
+})
+
+export const inventoryAssemblyCreateSchema = productCreateSchema.extend({
+  bundledProducts: z
+    .array(
+      z.object({
+        productId: z
+          .string({ required_error: "Product is required." })
+          .min(1, { message: "Product is required." }),
+        quantity: z
+          .number({ message: "Invalid qty." })
+          .int({ message: "Must be a whole number." })
+          .positive({ message: "Must be greater than 0." }),
+      })
+    )
+    .min(2, { message: "Should have at least 2 products." }),
 })
 
 export const copyProductSchema = inventoryCreateSchema
@@ -91,3 +109,7 @@ export type InventoryCreateInput = z.infer<typeof inventoryCreateSchema>
 export type CopyProductInput = z.infer<typeof copyProductSchema>
 
 export type ServiceInput = z.infer<typeof serviceCreateSchema>
+
+export type InventoryAssemblyInput = z.infer<
+  typeof inventoryAssemblyCreateSchema
+>

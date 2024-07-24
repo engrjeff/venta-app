@@ -234,7 +234,7 @@ model ProductServiceItem {
   isSelling    Boolean? @default(true)
   isPurchasing Boolean? @default(true)
 
-  bundledProducts ProductBundleItem[] @relation(name: "bundledProducts")
+  bundledProducts ProductBundleItem[]
 
   store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String
@@ -255,10 +255,12 @@ model ProductServiceItem {
 }
 
 model ProductBundleItem {
-  id        String             @id @default(cuid())
-  product   ProductServiceItem @relation(name: "bundledProducts", fields: [productId], references: [id])
+  id        String @id @default(cuid())
   quantity  Int
   productId String
+
+  productServiceItem   ProductServiceItem? @relation(fields: [productServiceItemId], references: [id])
+  productServiceItemId String?
 
   @@index([productId])
 }

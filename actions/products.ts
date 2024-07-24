@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import prisma from "@/prisma/client"
 import {
   copyProductSchema,
+  inventoryAssemblyCreateSchema,
   inventoryCreateSchema,
   inventoryEditSchema,
   nonInventoryEditSchema,
@@ -13,7 +14,10 @@ import {
 } from "@/schema/product"
 import { appendCurrency } from "@/server/utils"
 import { ProductServiceStatus, ProductServiceType } from "@prisma/client"
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from "@prisma/client/runtime/library"
 import pluralize from "pluralize"
 import { z } from "zod"
 
@@ -248,6 +252,58 @@ export const createNonInventoryProduct = authedProcedure
     }
   })
 
+export const createInventoryAssembly = authedProcedure
+  .createServerAction()
+  .input(inventoryAssemblyCreateSchema.merge(withStoreId))
+  .handler(async ({ ctx, input }) => {
+    try {
+      const { bundledProducts, ...fields } = input
+
+      const result = await prisma.productServiceItem.create({
+        data: {
+          ownerId: ctx.user.id,
+          type: ProductServiceType.INVENTORY_ASSEMBLY,
+          ...fields,
+          bundledProducts: {
+            createMany: {
+              data: bundledProducts,
+            },
+          },
+        },
+        include: {
+          store: {
+            select: {
+              slug: true,
+            },
+          },
+        },
+      })
+
+      // revalidate here
+      revalidatePath(`/${result.store.slug}/items`)
+
+      return result
+    } catch (error) {
+      console.log(error)
+      if (error instanceof PrismaClientValidationError) {
+        throw "Database error"
+      }
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case "P2002":
+            if (
+              Array.isArray(error.meta?.target) &&
+              error.meta?.target.includes("sku")
+            ) {
+              throw `The SKU "${input.sku}" already exists.`
+            }
+            throw `${input.name} already exists.`
+        }
+      }
+    }
+  })
+
 export const copyProductAction = authedProcedure
   .createServerAction()
   .input(copyProductSchema)
@@ -426,5 +482,36 @@ export const updateProduct = authedProcedure
             throw `Product name ${input.name} already exists.`
         }
       }
+    }
+  })
+
+// for product select
+export const getProductServiceOptions = authedProcedure
+  .createServerAction()
+  .input(withStoreId.extend({ search: z.string().optional() }))
+  .handler(async ({ ctx, input }) => {
+    try {
+      const result = await prisma.productServiceItem.findMany({
+        where: {
+          ownerId: ctx.user.id,
+          storeId: input.storeId,
+          status: ProductServiceStatus.ACTIVE,
+          type: {
+            not: ProductServiceType.INVENTORY_ASSEMBLY,
+          },
+          name: {
+            contains: input.search,
+            mode: "insensitive",
+          },
+        },
+        orderBy: {
+          name: "desc",
+        },
+      })
+
+      return result
+    } catch (error) {
+      console.log(error)
+      return []
     }
   })
