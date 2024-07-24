@@ -56,6 +56,10 @@ export const inventoryCreateSchema = productCreateSchema.extend({
     .optional(),
 })
 
+export const serviceCreateSchema = productCreateSchema.extend({
+  sku: z.string().optional(),
+})
+
 export const copyProductSchema = inventoryCreateSchema
   .pick({
     name: true,
@@ -80,3 +84,5 @@ export type ProductCreateInput = z.infer<typeof productCreateSchema>
 export type InventoryCreateInput = z.infer<typeof inventoryCreateSchema>
 
 export type CopyProductInput = z.infer<typeof copyProductSchema>
+
+export type ServiceInput = z.infer<typeof serviceCreateSchema>

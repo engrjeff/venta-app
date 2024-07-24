@@ -22,8 +22,8 @@ export function ProductServiceForm({ closeCallback }: Props) {
   const formMap: Record<ProductServiceType, ReactNode> = {
     INVENTORY: <InventoryTypeForm closeCallback={closeCallback} />,
     NON_INVENTORY: <NonInventoryTypeForm closeCallback={closeCallback} />,
+    SERVICE: <ServiceTypeForm closeCallback={closeCallback} />,
     INVENTORY_ASSEMBLY: <BundleTypeForm />,
-    SERVICE: <ServiceTypeForm />,
   }
 
   function handleProducTypeChange(value: string) {

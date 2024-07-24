@@ -19,6 +19,8 @@ const badgeVariants = cva(
           "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
         NON_INVENTORY:
           "border-transparent bg-sky-500 text-primary-foreground hover:bg-sky-500/80",
+        SERVICE:
+          "border-transparent bg-green-600 text-primary-foreground hover:bg-green-600/80",
       },
     },
     defaultVariants: {
