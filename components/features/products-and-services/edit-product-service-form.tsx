@@ -5,6 +5,7 @@ import { ProductServiceType } from "@prisma/client"
 
 import { InventoryTypeEditForm } from "./inventory-type-edit-form"
 import { NonInventoryTypeEditForm } from "./non-inventory-type-edit-form"
+import { ServiceTypeEditForm } from "./service-type-edit-form"
 
 interface Props {
   product: ProductItem
@@ -23,6 +24,11 @@ export function EditProductServiceForm({ product, closeCallback }: Props) {
         product={product}
         closeCallback={closeCallback}
       />
+    )
+
+  if (product.type === ProductServiceType.SERVICE)
+    return (
+      <ServiceTypeEditForm product={product} closeCallback={closeCallback} />
     )
 
   return (

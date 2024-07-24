@@ -9,6 +9,7 @@ import {
   nonInventoryEditSchema,
   productCreateSchema,
   serviceCreateSchema,
+  serviceEditSchema,
 } from "@/schema/product"
 import { appendCurrency } from "@/server/utils"
 import { ProductServiceStatus, ProductServiceType } from "@prisma/client"
@@ -351,7 +352,11 @@ export const updateProductStatus = authedProcedure
 export const updateProduct = authedProcedure
   .createServerAction()
   .input(
-    z.discriminatedUnion("type", [inventoryEditSchema, nonInventoryEditSchema])
+    z.discriminatedUnion("type", [
+      inventoryEditSchema,
+      nonInventoryEditSchema,
+      serviceEditSchema,
+    ])
   )
   .handler(async ({ ctx, input }) => {
     try {
@@ -373,6 +378,10 @@ export const updateProduct = authedProcedure
       }
 
       if (input.type === "non-inventory") {
+        fields = properties
+      }
+
+      if (input.type === "service") {
         fields = properties
       }
 
