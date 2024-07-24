@@ -3,8 +3,9 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
-import { PlusCircleIcon } from "lucide-react"
+import { CheckIcon, PlusCircleIcon } from "lucide-react"
 
+import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,7 +24,7 @@ interface DropdownFilterLinksProps {
   options: {
     label: string
     value: string
-    icon?: React.ComponentType<{ className?: string }>
+    color?: string
   }[]
 }
 
@@ -43,7 +44,11 @@ export function DropdownFilterLinks({
         searchParams ? searchParams : undefined
       )
 
-      params.set(paramKey, value)
+      if (!value) {
+        params.delete(paramKey)
+      } else {
+        params.set(paramKey, value)
+      }
 
       return params.toString()
     },
@@ -69,16 +74,42 @@ export function DropdownFilterLinks({
           ) : null}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-40" align="start">
+      <DropdownMenuContent className="w-48" align="start">
         <DropdownMenuLabel>Filter by {title}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {options.map((option) => (
           <DropdownMenuItem key={`${title}-option-${option.value}`} asChild>
-            <Link href={`${pathname}?${createQueryString(option.value)}`}>
-              {option.label}
+            <Link
+              href={`${pathname}?${createQueryString(option.value)}`}
+              className="relative flex items-center gap-3"
+            >
+              {option.color ? (
+                <span
+                  className={cn(
+                    "size-1.5 inline-block rounded-full leading-none",
+                    option.color
+                  )}
+                />
+              ) : null}{" "}
+              <span>{option.label}</span>
+              {currentValue === option.value ? (
+                <span className="ml-auto inline-block">
+                  <CheckIcon className="size-4 text-primary" />
+                </span>
+              ) : null}
             </Link>
           </DropdownMenuItem>
         ))}
+        {currentValue ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href={`${pathname}?${createQueryString("")}`}>
+                Remove filter
+              </Link>
+            </DropdownMenuItem>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   )
