@@ -101,9 +101,11 @@ export function ProductRowActions({ product }: Props) {
   return (
     <>
       <div className="flex items-center gap-4">
-        <Button size="sm" variant="link" onClick={() => setAction("edit")}>
-          Edit
-        </Button>
+        {product.status === ProductServiceStatus.ACTIVE ? (
+          <Button size="sm" variant="link" onClick={() => setAction("edit")}>
+            Edit
+          </Button>
+        ) : null}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="size-8 p-0">
