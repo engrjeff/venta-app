@@ -74,6 +74,10 @@ export const getProductServiceItems = authedProcedure
           : undefined,
       }))
 
+      const totalCount = await prisma.productServiceItem.count({
+        where: { storeId: input.storeId },
+      })
+
       const total = await prisma.productServiceItem.count({
         where: {
           storeId: input.storeId,
@@ -92,6 +96,7 @@ export const getProductServiceItems = authedProcedure
       const pageInfo = {
         currentPage: input.page ?? DEFAULT_PAGE,
         pageSize,
+        totalCount,
         totalPages: Math.ceil(total / pageSize),
       }
 
@@ -106,6 +111,7 @@ export const getProductServiceItems = authedProcedure
         pageInfo: {
           currentPage: DEFAULT_PAGE,
           pageSize: DEFAULT_PAGE_SIZE,
+          totalCount: 0,
           totalPages: 0,
         },
       }

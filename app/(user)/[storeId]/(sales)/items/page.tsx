@@ -51,7 +51,11 @@ async function ProductsAndServicesPage({ params, searchParams }: PageProps) {
         </div>
       </div>
       <ProductServiceTable products={products?.items ?? []} />
-      <div className="flex justify-end py-4">
+      <div className="flex justify-between py-4">
+        <p className="text-sm text-muted-foreground">
+          Showing {products?.items.length} of {products?.pageInfo.totalCount}{" "}
+          products
+        </p>
         <Suspense>
           <PaginationLinks
             currentPage={products?.pageInfo?.currentPage!}
