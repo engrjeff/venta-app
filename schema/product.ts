@@ -66,6 +66,7 @@ export const inventoryAssemblyCreateSchema = productCreateSchema.extend({
   bundledProducts: z
     .array(
       z.object({
+        id: z.string().optional(),
         productId: z
           .string({ required_error: "Product is required." })
           .min(1, { message: "Product is required." }),

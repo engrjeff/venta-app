@@ -1,6 +1,6 @@
 "use client"
 
-import { createInventoryAssembly } from "@/actions/products"
+import { createInventoryAssembly, ProductItem } from "@/actions/products"
 import {
   inventoryAssemblyCreateSchema,
   InventoryAssemblyInput,
@@ -8,7 +8,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod"
 import { MinusCircleIcon, PlusCircleIcon } from "lucide-react"
 import { FieldErrors, useFieldArray, useForm } from "react-hook-form"
-import { toast } from "sonner"
 import { useServerAction } from "zsa-react"
 
 import { useCurrentStore } from "@/hooks/useCurrentStore"
@@ -32,20 +31,24 @@ import { SkuInput } from "./sku-input"
 
 interface Props {
   closeCallback?: () => void
+  product: ProductItem
 }
 
-export function BundleTypeForm({ closeCallback }: Props) {
+export function BundleTypeEditForm({ closeCallback, product }: Props) {
   const store = useCurrentStore()
 
   const form = useForm<InventoryAssemblyInput>({
     resolver: zodResolver(inventoryAssemblyCreateSchema),
     mode: "onChange",
     defaultValues: {
-      sku: "",
-      bundledProducts: [
-        { productId: "", quantity: 0 },
-        { productId: "", quantity: 0 },
-      ],
+      name: product.name ?? undefined,
+      sku: product.sku ?? "",
+      description: product.description ?? undefined,
+      bundledProducts: product.bundledProducts.map((b) => ({
+        productId: b.productId,
+        quantity: b.quantity,
+        id: b.id,
+      })),
     },
   })
 
@@ -67,39 +70,32 @@ export function BundleTypeForm({ closeCallback }: Props) {
     shouldClose?: boolean
   ) {
     try {
-      if (!store.data?.id) return
+      alert("Not yet implemented.")
+      return
 
-      const [data, err] = await createAction.execute({
-        storeId: store.data.id,
-        ...values,
-      })
+      // if (!store.data?.id) return
 
-      if (err) {
-        toast.error(err.message)
-        return
-      }
+      // const [data, err] = await createAction.execute({
+      //   storeId: store.data.id,
+      //   ...values,
+      // })
 
-      toast.success(`${data?.name} was saved!`)
+      // if (err) {
+      //   toast.error(err.message)
+      //   return
+      // }
 
-      form.reset()
+      // toast.success(`${data?.name} was saved!`)
 
-      if (shouldClose) {
-        // close form sheet
-        if (closeCallback) {
-          closeCallback()
-        }
-      }
+      // form.reset()
+
+      // if (shouldClose) {
+      //   // close form sheet
+      //   if (closeCallback) {
+      //     closeCallback()
+      //   }
+      // }
     } catch (error) {}
-  }
-
-  async function saveAndNew() {
-    const isValid = await form.trigger(undefined, { shouldFocus: true })
-
-    if (!isValid) return
-
-    const values = form.getValues()
-
-    await onSubmit(values, false)
   }
 
   return (
@@ -212,13 +208,13 @@ export function BundleTypeForm({ closeCallback }: Props) {
                           <FormLabel className="sr-only">Product</FormLabel>
                           <FormControl>
                             <ProductCombobox
-                              value={field.value}
-                              onValueChange={field.onChange}
                               excludedIds={
                                 form
                                   .watch("bundledProducts")
                                   .map((b) => b.id) as string[]
                               }
+                              value={field.value}
+                              onValueChange={field.onChange}
                             />
                           </FormControl>
                           <FormMessage />
@@ -294,17 +290,16 @@ export function BundleTypeForm({ closeCallback }: Props) {
 
         <div className="sticky bottom-0 border-t bg-background p-4">
           <div className="flex items-center justify-end gap-3">
-            <Button type="submit" size="sm" loading={isBusy}>
-              Save and Close
-            </Button>
             <Button
-              type="button"
+              type="reset"
               size="sm"
-              variant="outline"
-              onClick={saveAndNew}
-              loading={isBusy}
+              variant="ghost"
+              onClick={() => form.reset()}
             >
-              Save and New
+              Reset
+            </Button>
+            <Button type="submit" size="sm" loading={isBusy}>
+              Save Changes
             </Button>
           </div>
         </div>

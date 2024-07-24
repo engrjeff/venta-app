@@ -3,6 +3,7 @@
 import { ProductItem } from "@/actions/products"
 import { ProductServiceType } from "@prisma/client"
 
+import { BundleTypeEditForm } from "./bundle-type-edit-form"
 import { InventoryTypeEditForm } from "./inventory-type-edit-form"
 import { NonInventoryTypeEditForm } from "./non-inventory-type-edit-form"
 import { ServiceTypeEditForm } from "./service-type-edit-form"
@@ -29,6 +30,11 @@ export function EditProductServiceForm({ product, closeCallback }: Props) {
   if (product.type === ProductServiceType.SERVICE)
     return (
       <ServiceTypeEditForm product={product} closeCallback={closeCallback} />
+    )
+
+  if (product.type === ProductServiceType.INVENTORY_ASSEMBLY)
+    return (
+      <BundleTypeEditForm product={product} closeCallback={closeCallback} />
     )
 
   return (

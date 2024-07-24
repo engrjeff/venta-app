@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useDebouncedValue } from "@mantine/hooks"
-import { ProductServiceItem } from "@prisma/client"
 import { useCombobox } from "downshift"
 import { ChevronDownIcon } from "lucide-react"
 import { useSpinDelay } from "spin-delay"
@@ -15,22 +14,32 @@ import { Spinner } from "@/components/shared/spinner"
 interface Props {
   value?: string
   onValueChange: (val: string | undefined) => void
+  excludedIds?: string[]
 }
 
-export function ProductCombobox({ value, onValueChange }: Props) {
+export function ProductCombobox({ value, onValueChange, excludedIds }: Props) {
   const [search, setSearch] = useState("")
-  const [selectedItem, setSelectedItem] = useState<ProductServiceItem | null>(
-    null
-  )
 
   const [debouncedSearch] = useDebouncedValue(search, 400)
 
-  const { data, isRefetching } = useProductOptions(debouncedSearch)
+  const { data, isRefetching } = useProductOptions(debouncedSearch, excludedIds)
+
+  const [selectedItem, setSelectedItem] = useState<string | null>(() =>
+    value ? value : null
+  )
 
   const showSpinner = useSpinDelay(isRefetching, {
     delay: 500,
     minDuration: 200,
   })
+
+  useEffect(() => {
+    if (value) {
+      setSelectedItem(value)
+    }
+  }, [value])
+
+  const items = data?.map((d) => d.id) ?? []
 
   const {
     isOpen,
@@ -39,17 +48,22 @@ export function ProductCombobox({ value, onValueChange }: Props) {
     getMenuProps,
     getItemProps,
   } = useCombobox({
-    items: data ?? [],
-    itemToString(item) {
-      return item ? item.name : ""
-    },
+    items,
     selectedItem,
+
+    itemToString(item) {
+      if (!item) return ""
+
+      const found = data?.find((d) => d.id === item)
+
+      return found ? found.name : ""
+    },
     onInputValueChange({ inputValue }) {
       setSearch(inputValue)
     },
     onSelectedItemChange({ selectedItem }) {
       setSelectedItem(selectedItem)
-      onValueChange(selectedItem.id)
+      onValueChange(selectedItem)
     },
   })
 
@@ -84,13 +98,13 @@ export function ProductCombobox({ value, onValueChange }: Props) {
             <li
               className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
               key={item.id}
-              {...getItemProps({ item, index })}
+              {...getItemProps({ item: item.id, index })}
             >
               <span>{item.name}</span>
             </li>
           ))}
 
-        {data?.length === 0 ? (
+        {items?.length === 0 && search ? (
           <li>
             <span className="text-sm text-muted-foreground">
               No results found

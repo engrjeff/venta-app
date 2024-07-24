@@ -56,6 +56,7 @@ export const getProductServiceItems = authedProcedure
           unit: {
             select: { id: true, name: true },
           },
+          bundledProducts: true,
         },
         take: pageSize,
         skip: getSkip({ limit: input.limit, page: input.page }),
@@ -488,7 +489,12 @@ export const updateProduct = authedProcedure
 // for product select
 export const getProductServiceOptions = authedProcedure
   .createServerAction()
-  .input(withStoreId.extend({ search: z.string().optional() }))
+  .input(
+    withStoreId.extend({
+      search: z.string().optional(),
+      excludedIds: z.string().array().optional(),
+    })
+  )
   .handler(async ({ ctx, input }) => {
     try {
       const result = await prisma.productServiceItem.findMany({
@@ -502,6 +508,9 @@ export const getProductServiceOptions = authedProcedure
           name: {
             contains: input.search,
             mode: "insensitive",
+          },
+          id: {
+            notIn: input.excludedIds,
           },
         },
         orderBy: {
