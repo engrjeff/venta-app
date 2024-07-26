@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useId, useState } from "react"
 import { useDebouncedValue } from "@mantine/hooks"
 import { useCombobox } from "downshift"
 import { ChevronDownIcon } from "lucide-react"
@@ -18,13 +18,15 @@ interface Props {
 }
 
 export function ProductCombobox({ value, onValueChange, excludedIds }: Props) {
+  const id = useId()
+
   const [search, setSearch] = useState("")
 
   const [debouncedSearch] = useDebouncedValue(search, 400)
 
   const { data, isRefetching } = useProductOptions(debouncedSearch, excludedIds)
 
-  const [selectedItem, setSelectedItem] = useState<string | null>(() =>
+  const [selectedItem, setSelectedItem] = useState<string | null>(
     value ? value : null
   )
 
@@ -32,12 +34,6 @@ export function ProductCombobox({ value, onValueChange, excludedIds }: Props) {
     delay: 500,
     minDuration: 200,
   })
-
-  useEffect(() => {
-    if (value) {
-      setSelectedItem(value)
-    }
-  }, [value])
 
   const items = data?.map((d) => d.id) ?? []
 
@@ -48,13 +44,15 @@ export function ProductCombobox({ value, onValueChange, excludedIds }: Props) {
     getMenuProps,
     getItemProps,
   } = useCombobox({
+    id,
     items,
     selectedItem,
-
     itemToString(item) {
       if (!item) return ""
 
       const found = data?.find((d) => d.id === item)
+
+      console.log(data, found)
 
       return found ? found.name : ""
     },
@@ -65,6 +63,7 @@ export function ProductCombobox({ value, onValueChange, excludedIds }: Props) {
       setSelectedItem(selectedItem)
       onValueChange(selectedItem)
     },
+    initialInputValue: data?.find((d) => d.id === value)?.name,
   })
 
   return (

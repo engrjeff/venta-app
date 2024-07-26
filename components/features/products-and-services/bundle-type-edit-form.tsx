@@ -24,9 +24,9 @@ import {
 import { ImagePicker } from "@/components/ui/image-picker"
 import { Label } from "@/components/ui/label"
 import { NumberInput } from "@/components/ui/number-input"
+import { ProductSelect } from "@/components/ui/product-select"
 import { Textarea } from "@/components/ui/textarea"
 
-import { ProductCombobox } from "./product-combobox"
 import { SkuInput } from "./sku-input"
 
 interface Props {
@@ -207,12 +207,7 @@ export function BundleTypeEditForm({ closeCallback, product }: Props) {
                         <FormItem className="space-y-1">
                           <FormLabel className="sr-only">Product</FormLabel>
                           <FormControl>
-                            <ProductCombobox
-                              excludedIds={
-                                form
-                                  .watch("bundledProducts")
-                                  .map((b) => b.id) as string[]
-                              }
+                            <ProductSelect
                               value={field.value}
                               onValueChange={field.onChange}
                             />

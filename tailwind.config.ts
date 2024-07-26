@@ -80,6 +80,7 @@ const config = {
       },
       width: {
         "trigger-width": "var(--radix-dropdown-menu-trigger-width)",
+        "popover-trigger-width": "var(--radix-popover-trigger-width)",
       },
     },
   },

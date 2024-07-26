@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { type DialogProps } from "@radix-ui/react-dialog"
-import { Command as CommandPrimitive } from "cmdk"
+import { CommandLoading, Command as CommandPrimitive } from "cmdk"
 import { Search } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -155,6 +155,7 @@ export {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandLoading,
   CommandSeparator,
   CommandShortcut,
 }

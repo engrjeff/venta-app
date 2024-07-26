@@ -61,7 +61,10 @@ export const columns: ColumnDef<ProductItem>[] = [
       return <SortLink sortValue="type" title="Type" />
     },
     cell: ({ row }) => (
-      <Badge className="capitalize" variant={row.original.type as any}>
+      <Badge
+        className="text-nowrap capitalize"
+        variant={row.original.type as any}
+      >
         {row.original.type.replaceAll("_", " ").toLowerCase()}
       </Badge>
     ),
@@ -69,26 +72,7 @@ export const columns: ColumnDef<ProductItem>[] = [
       return value.includes(row.getValue(id))
     },
   },
-  {
-    accessorKey: "initialQuantity",
-    header: ({ column }) => {
-      return <SortLink sortValue="initialQuantity" title="Qty on Hand" />
-    },
-    cell: ({ row }) => (
-      <div className="text-center">
-        {row.getValue("initialQuantity")} {row.original.unit?.name}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "reorderPoint",
-    header: ({ column }) => {
-      return <SortLink sortValue="reorderPoint" title="Reorder Point" />
-    },
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("reorderPoint")}</div>
-    ),
-  },
+
   {
     accessorKey: "salesPriceOrRate",
     header: ({ column }) => {
@@ -113,6 +97,26 @@ export const columns: ColumnDef<ProductItem>[] = [
     },
     cell: ({ row }) => (
       <div className="text-nowrap text-right">{row.getValue("cost")}</div>
+    ),
+  },
+  {
+    accessorKey: "initialQuantity",
+    header: ({ column }) => {
+      return <SortLink sortValue="initialQuantity" title="Qty on Hand" />
+    },
+    cell: ({ row }) => (
+      <div className="text-center">
+        {row.getValue("initialQuantity")} {row.original.unit?.name}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "reorderPoint",
+    header: ({ column }) => {
+      return <SortLink sortValue="reorderPoint" title="Reorder Point" />
+    },
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("reorderPoint")}</div>
     ),
   },
   {
