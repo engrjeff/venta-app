@@ -5,6 +5,8 @@ import prisma from "@/prisma/client"
 import {
   copyProductSchema,
   inventoryAssemblyCreateSchema,
+  InventoryAssemblyEditInput,
+  inventoryAssemblyEditSchema,
   inventoryCreateSchema,
   inventoryEditSchema,
   nonInventoryEditSchema,
@@ -419,6 +421,7 @@ export const updateProduct = authedProcedure
       inventoryEditSchema,
       nonInventoryEditSchema,
       serviceEditSchema,
+      inventoryAssemblyEditSchema,
     ])
   )
   .handler(async ({ ctx, input }) => {
@@ -446,6 +449,10 @@ export const updateProduct = authedProcedure
 
       if (input.type === "service") {
         fields = properties
+      }
+
+      if (input.type === "inventory-assembly") {
+        return updateInventoryAssembly(input)
       }
 
       const result = await prisma.productServiceItem.update({
@@ -485,6 +492,84 @@ export const updateProduct = authedProcedure
       }
     }
   })
+
+// update bundled products
+async function updateInventoryAssembly(input: InventoryAssemblyEditInput) {
+  const { id, type, bundledProducts, ...fields } = input
+
+  // update fields
+  const result = await prisma.productServiceItem.update({
+    where: {
+      id,
+    },
+    data: fields,
+    include: {
+      store: {
+        select: {
+          slug: true,
+        },
+      },
+    },
+  })
+
+  // collect bundledProducts
+  // no Id means new, for create
+  // with Id means for update
+  const bundledItemsWithMainId = bundledProducts.map((b) => ({
+    ...b,
+    productServiceItemId: input.id,
+  }))
+
+  const bundledItemsForCreate = bundledItemsWithMainId.filter((b) => !b.id)
+
+  const bundledItemsForUpdate = bundledItemsWithMainId.filter((b) => b.id)
+
+  const bundledItemsToDelete = await prisma.productBundleItem.findMany({
+    where: {
+      productServiceItemId: input.id,
+      AND: {
+        id: {
+          notIn: bundledItemsForUpdate.map((item) => item.id) as string[],
+        },
+      },
+    },
+  })
+
+  if (bundledItemsToDelete?.length) {
+    await prisma.productBundleItem.deleteMany({
+      where: {
+        id: {
+          in: bundledItemsToDelete.map((item) => item.id),
+        },
+      },
+    })
+  }
+
+  if (bundledItemsForUpdate?.length) {
+    await Promise.all(
+      bundledItemsForUpdate.map(
+        async (item) =>
+          await prisma.productBundleItem.update({
+            data: item,
+            where: {
+              id: item.id,
+            },
+          })
+      )
+    )
+  }
+
+  if (bundledItemsForCreate?.length) {
+    await prisma.productBundleItem.createMany({
+      data: bundledItemsForCreate,
+    })
+  }
+
+  // revalidate here
+  revalidatePath(`/${result.store.slug}/items`)
+
+  return result
+}
 
 // for product select
 export const getProductServiceOptions = authedProcedure

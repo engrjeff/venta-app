@@ -1,6 +1,6 @@
 "use client"
 
-import { createInventoryAssembly, ProductItem } from "@/actions/products"
+import { ProductItem, updateProduct } from "@/actions/products"
 import {
   inventoryAssemblyCreateSchema,
   InventoryAssemblyInput,
@@ -8,6 +8,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod"
 import { MinusCircleIcon, PlusCircleIcon } from "lucide-react"
 import { FieldErrors, useFieldArray, useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { useServerAction } from "zsa-react"
 
 import { useCurrentStore } from "@/hooks/useCurrentStore"
@@ -57,9 +58,9 @@ export function BundleTypeEditForm({ closeCallback, product }: Props) {
     control: form.control,
   })
 
-  const createAction = useServerAction(createInventoryAssembly)
+  const editAction = useServerAction(updateProduct)
 
-  const isBusy = createAction.isPending
+  const isBusy = editAction.isPending
 
   function onError(errors: FieldErrors<InventoryAssemblyInput>) {
     console.log(errors)
@@ -70,31 +71,29 @@ export function BundleTypeEditForm({ closeCallback, product }: Props) {
     shouldClose?: boolean
   ) {
     try {
-      alert("Not yet implemented.")
-      return
+      if (!store.data?.id) return
 
-      // if (!store.data?.id) return
+      const [data, err] = await editAction.execute({
+        type: "inventory-assembly",
+        id: product.id,
+        ...values,
+      })
 
-      // const [data, err] = await createAction.execute({
-      //   storeId: store.data.id,
-      //   ...values,
-      // })
+      if (err) {
+        toast.error(err.message)
+        return
+      }
 
-      // if (err) {
-      //   toast.error(err.message)
-      //   return
-      // }
+      toast.success(`${data?.name} was saved!`)
 
-      // toast.success(`${data?.name} was saved!`)
+      form.reset()
 
-      // form.reset()
-
-      // if (shouldClose) {
-      //   // close form sheet
-      //   if (closeCallback) {
-      //     closeCallback()
-      //   }
-      // }
+      if (shouldClose) {
+        // close form sheet
+        if (closeCallback) {
+          closeCallback()
+        }
+      }
     } catch (error) {}
   }
 

@@ -103,6 +103,13 @@ export const serviceEditSchema = serviceCreateSchema.extend({
   id: z.string(),
 })
 
+export const inventoryAssemblyEditSchema = inventoryAssemblyCreateSchema.extend(
+  {
+    type: z.literal("inventory-assembly"),
+    id: z.string(),
+  }
+)
+
 export type ProductCreateInput = z.infer<typeof productCreateSchema>
 
 export type InventoryCreateInput = z.infer<typeof inventoryCreateSchema>
@@ -113,4 +120,8 @@ export type ServiceInput = z.infer<typeof serviceCreateSchema>
 
 export type InventoryAssemblyInput = z.infer<
   typeof inventoryAssemblyCreateSchema
+>
+
+export type InventoryAssemblyEditInput = z.infer<
+  typeof inventoryAssemblyEditSchema
 >
