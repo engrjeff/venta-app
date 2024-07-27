@@ -22,3 +22,9 @@ export const changeStatusSchema = z.object({
   id: z.string({ required_error: "ID is required." }),
   status: z.nativeEnum(ItemStatus),
 })
+
+export const changeBulkStatusSchema = z.object({
+  ids: z.string({ required_error: "ID is required." }).array(),
+  status: z.nativeEnum(ItemStatus),
+  storeSlug: z.string(),
+})

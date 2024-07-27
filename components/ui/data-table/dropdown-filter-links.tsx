@@ -38,6 +38,8 @@ export function DropdownFilterLinks({
 
   const currentValue = searchParams.get(paramKey)
 
+  const currentOption = options.find((o) => o.value === currentValue)
+
   const createQueryString = React.useCallback(
     (value: string) => {
       const params = new URLSearchParams(
@@ -66,7 +68,12 @@ export function DropdownFilterLinks({
               <Separator orientation="vertical" className="mx-2 h-4" />
               <Badge
                 variant="secondary"
-                className="rounded-sm px-1 font-normal capitalize"
+                className={cn(
+                  "rounded-sm px-1 font-normal capitalize",
+                  currentOption?.color
+                    ? `${currentOption.color} text-white`
+                    : ""
+                )}
               >
                 {currentValue.replaceAll("_", " ").toLowerCase()}
               </Badge>
@@ -74,7 +81,7 @@ export function DropdownFilterLinks({
           ) : null}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-48" align="start">
+      <DropdownMenuContent className="w-trigger-width min-w-48" align="start">
         <DropdownMenuLabel>Filter by {title}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {options.map((option) => (

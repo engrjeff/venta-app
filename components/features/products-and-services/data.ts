@@ -1,4 +1,4 @@
-import { ProductServiceType } from "@prisma/client"
+import { ProductServiceStockStatus, ProductServiceType } from "@prisma/client"
 
 export const PRODUCT_TYPES = [
   {
@@ -31,5 +31,23 @@ export const PRODUCT_STATUS_OPTIONS = [
   {
     label: "Inactive",
     value: "inactive",
+  },
+]
+
+export const PRODUCT_STOCK_STATUS_OPTIONS = [
+  {
+    label: "In Stock",
+    value: ProductServiceStockStatus.IN_STOCK,
+    color: "bg-green-600",
+  },
+  {
+    label: "Low Stock",
+    value: ProductServiceStockStatus.LOW_STOCK,
+    color: "bg-amber-500",
+  },
+  {
+    label: "Out of Stock",
+    value: ProductServiceStockStatus.OUT_OF_STOCK,
+    color: "bg-red-500",
   },
 ]

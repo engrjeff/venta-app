@@ -3,7 +3,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getProductServiceItems } from "@/actions/products"
 import { getStoreBySlug } from "@/actions/stores"
-import { ProductServiceType } from "@prisma/client"
+import { ProductServiceStockStatus, ProductServiceType } from "@prisma/client"
 
 import { PaginationLinks } from "@/components/ui/data-table/pagination-links"
 import { MoreDropDown } from "@/components/features/products-and-services/more-dropdown"
@@ -40,6 +40,7 @@ async function ProductsAndServicesPage({ params, searchParams }: PageProps) {
     status: searchParams.status,
     search: searchParams.search,
     type: searchParams.type as ProductServiceType,
+    stockStatus: searchParams.stockStatus as ProductServiceStockStatus,
   })
 
   if (products?.pageInfo.totalCount === 0)

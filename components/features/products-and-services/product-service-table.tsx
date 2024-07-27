@@ -13,7 +13,12 @@ import { SortLink } from "@/components/ui/data-table/sort-link"
 import { useDataTable } from "@/components/ui/data-table/useDataTable"
 import { SearchField } from "@/components/shared/search-field"
 
-import { PRODUCT_STATUS_OPTIONS, PRODUCT_TYPES } from "./data"
+import {
+  PRODUCT_STATUS_OPTIONS,
+  PRODUCT_STOCK_STATUS_OPTIONS,
+  PRODUCT_TYPES,
+} from "./data"
+import { ProductBulkActions } from "./product-bulk-actions"
 import { ProductRowActions } from "./product-row-actions"
 
 export const columns: ColumnDef<ProductItem>[] = [
@@ -135,23 +140,43 @@ interface ProductServiceTableProps {
 export function ProductServiceTable({ products }: ProductServiceTableProps) {
   const table = useDataTable({ data: products ?? [], columns })
 
+  const selectedIds = table
+    .getSelectedRowModel()
+    .rows.map((row) => row.original.id)
+
+  function bulkActionCallback() {
+    table.resetRowSelection()
+  }
+
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center space-x-2">
         <Suspense>
           <SearchField placeholder="Search products" />
           <DropdownFilterLinks
+            paramKey="status"
+            title="Status"
+            options={PRODUCT_STATUS_OPTIONS}
+          />
+          <DropdownFilterLinks
             paramKey="type"
             title="Type"
             options={PRODUCT_TYPES}
           />
           <DropdownFilterLinks
-            paramKey="status"
-            title="Status"
-            options={PRODUCT_STATUS_OPTIONS}
+            paramKey="stockStatus"
+            title="Stock"
+            options={PRODUCT_STOCK_STATUS_OPTIONS}
           />
           <FilterResetLink />
         </Suspense>
+
+        <div className="ml-auto">
+          <ProductBulkActions
+            productIds={selectedIds}
+            callback={bulkActionCallback}
+          />
+        </div>
       </div>
       <DataTable table={table} columnLength={columns.length} />
     </div>

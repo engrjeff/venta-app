@@ -15,7 +15,11 @@ import {
   serviceEditSchema,
 } from "@/schema/product"
 import { appendCurrency } from "@/server/utils"
-import { ProductServiceStatus, ProductServiceType } from "@prisma/client"
+import {
+  ProductServiceStatus,
+  ProductServiceStockStatus,
+  ProductServiceType,
+} from "@prisma/client"
 import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
@@ -25,7 +29,12 @@ import { z } from "zod"
 
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, getSkip } from "./config"
 import { authedProcedure } from "./procedures/auth"
-import { changeStatusSchema, withPaginationAndSort, withStoreId } from "./types"
+import {
+  changeBulkStatusSchema,
+  changeStatusSchema,
+  withPaginationAndSort,
+  withStoreId,
+} from "./types"
 
 export const getProductServiceItems = authedProcedure
   .createServerAction()
@@ -34,6 +43,7 @@ export const getProductServiceItems = authedProcedure
       status: z.string().default("true"),
       search: z.string().optional(),
       type: z.nativeEnum(ProductServiceType).optional(),
+      stockStatus: z.nativeEnum(ProductServiceStockStatus).optional(),
     })
   )
   .handler(async ({ ctx, input }) => {
@@ -48,6 +58,7 @@ export const getProductServiceItems = authedProcedure
             input.status === "inactive"
               ? ProductServiceStatus.INACTIVE
               : ProductServiceStatus.ACTIVE,
+          stockStatus: input.stockStatus,
           name: {
             contains: input.search,
             mode: "insensitive",
@@ -92,6 +103,7 @@ export const getProductServiceItems = authedProcedure
             input.status === "inactive"
               ? ProductServiceStatus.INACTIVE
               : ProductServiceStatus.ACTIVE,
+          stockStatus: input.stockStatus,
           name: {
             contains: input.search,
             mode: "insensitive",
@@ -410,6 +422,33 @@ export const updateProductStatus = authedProcedure
 
       return result
     } catch (error) {
+      if (typeof error === "string") throw error
+    }
+  })
+
+export const updateBulkProductStatus = authedProcedure
+  .createServerAction()
+  .input(changeBulkStatusSchema)
+
+  .handler(async ({ ctx, input }) => {
+    try {
+      const result = await prisma.productServiceItem.updateMany({
+        where: {
+          id: {
+            in: input.ids,
+          },
+        },
+        data: {
+          status: input.status,
+        },
+      })
+
+      // revalidate here
+      revalidatePath(`/${input.storeSlug}/items`)
+
+      return result
+    } catch (error) {
+      console.log(error)
       if (typeof error === "string") throw error
     }
   })
