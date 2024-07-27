@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { updateUnitStatus } from "@/actions/units"
-import { ItemStatus, Unit } from "@prisma/client"
+import { ItemStatus } from "@prisma/client"
 import { MoreHorizontal } from "lucide-react"
 import { toast } from "sonner"
 import { useServerAction } from "zsa-react"
@@ -33,13 +33,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-// import { EditCategoryForm } from "./edit-category-form"
+import { EditUnitForm } from "./edit-unit-form"
+import { UnitWithConversion } from "./types"
 
 interface Props {
-  unit: Unit
+  unit: UnitWithConversion
 }
 
-type RowAction = "edit" | "change-status" | "assign-to-product"
+type RowAction =
+  | "edit"
+  | "change-status"
+  | "assign-to-product"
+  | "view-conversions"
 
 export function UnitRowActions({ unit }: Props) {
   const [action, setAction] = useState<RowAction>()
@@ -63,6 +68,10 @@ export function UnitRowActions({ unit }: Props) {
 
       toast.success(`Unit status updated!`)
     } catch (error) {}
+  }
+
+  function resetAction() {
+    setAction(undefined)
   }
 
   return (
@@ -103,7 +112,7 @@ export function UnitRowActions({ unit }: Props) {
       <AlertDialog
         open={action === "change-status"}
         onOpenChange={(isOpen) => {
-          if (!isOpen) setAction(undefined)
+          if (!isOpen) resetAction()
         }}
       >
         <AlertDialogContent>
@@ -130,22 +139,19 @@ export function UnitRowActions({ unit }: Props) {
       <Dialog
         open={action === "edit"}
         onOpenChange={(isOpen) => {
-          if (!isOpen) setAction(undefined)
+          if (!isOpen) resetAction()
         }}
       >
         <DialogPortal>
           <DialogContent
-            className="sm:max-w-md"
+            className="sm:max-w-lg"
             onInteractOutside={(e) => e.preventDefault()}
           >
             <DialogHeader>
               <DialogTitle>Edit {unit.name}</DialogTitle>
             </DialogHeader>
 
-            {/* <EditCategoryForm
-              category={category}
-              onAfterSave={() => setAction(undefined)}
-            /> */}
+            <EditUnitForm unit={unit} onAfterSave={resetAction} />
           </DialogContent>
         </DialogPortal>
       </Dialog>

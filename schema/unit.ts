@@ -5,6 +5,7 @@ export const conversionSchema = z.object({
   to: z.string().min(1, { message: "Required." }),
   description: z.string().optional(),
   factor: z.string().min(1, { message: "Required." }),
+  id: z.string().optional(),
 })
 
 export const createUnitSchema = z.object({
@@ -13,9 +14,13 @@ export const createUnitSchema = z.object({
   conversions: z.array(conversionSchema),
 })
 
-export type UnitConversionInput = z.infer<typeof conversionSchema>
+export const editUnitSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, { message: "Unit name is required." }),
+  conversions: z.array(conversionSchema),
+})
 
-export const editUnitSchema = createUnitSchema.partial()
+export type UnitConversionInput = z.infer<typeof conversionSchema>
 
 export type CreateUnitInput = z.infer<typeof createUnitSchema>
 

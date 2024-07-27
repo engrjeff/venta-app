@@ -2,7 +2,12 @@
 
 import { revalidatePath } from "next/cache"
 import prisma from "@/prisma/client"
-import { conversionSchema, createUnitSchema } from "@/schema/unit"
+import {
+  conversionSchema,
+  createUnitSchema,
+  editUnitSchema,
+} from "@/schema/unit"
+import { ItemStatus } from "@prisma/client"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { z } from "zod"
 
@@ -12,7 +17,12 @@ import { changeStatusSchema, withPaginationAndSort, withStoreId } from "./types"
 
 export const getStoreUnits = authedProcedure
   .createServerAction()
-  .input(withStoreId.merge(withPaginationAndSort))
+  .input(
+    withStoreId.merge(withPaginationAndSort).extend({
+      status: z.string().default("true"),
+      search: z.string().optional(),
+    })
+  )
   .handler(async ({ ctx, input }) => {
     try {
       const pageSize = input.limit ?? DEFAULT_PAGE_SIZE
@@ -21,6 +31,14 @@ export const getStoreUnits = authedProcedure
         where: {
           ownerId: ctx.user.id,
           storeId: input.storeId,
+          status:
+            input.status === "inactive"
+              ? ItemStatus.INACTIVE
+              : ItemStatus.ACTIVE,
+          name: {
+            contains: input.search,
+            mode: "insensitive",
+          },
         },
         include: {
           conversions: true,
@@ -32,13 +50,28 @@ export const getStoreUnits = authedProcedure
         },
       })
 
-      const total = await prisma.unit.count({
+      const totalCount = await prisma.unit.count({
         where: { storeId: input.storeId },
+      })
+
+      const total = await prisma.unit.count({
+        where: {
+          storeId: input.storeId,
+          status:
+            input.status === "inactive"
+              ? ItemStatus.INACTIVE
+              : ItemStatus.ACTIVE,
+          name: {
+            contains: input.search,
+            mode: "insensitive",
+          },
+        },
       })
 
       const pageInfo = {
         currentPage: input.page ?? DEFAULT_PAGE,
         pageSize,
+        totalCount,
         totalPages: Math.ceil(total / pageSize),
       }
 
@@ -52,6 +85,7 @@ export const getStoreUnits = authedProcedure
         pageInfo: {
           currentPage: DEFAULT_PAGE,
           pageSize: DEFAULT_PAGE_SIZE,
+          totalCount: 0,
           totalPages: 0,
         },
       }
@@ -169,3 +203,8 @@ export const updateUnitStatus = authedProcedure
       if (typeof error === "string") throw error
     }
   })
+
+export const updateUnit = authedProcedure
+  .createServerAction()
+  .input(editUnitSchema)
+  .handler(async ({ ctx, input }) => {})

@@ -35,7 +35,17 @@ async function CategoriesPage({ params, searchParams }: PageProps) {
     page: isNaN(+searchParams.p) ? 1 : Number(searchParams.p),
     sort: searchParams.sort,
     order: searchParams.order,
+    status: searchParams.status,
+    search: searchParams.search,
   })
+
+  if (categories?.pageInfo.totalCount === 0)
+    return (
+      <div className="flex min-h-[75vh] w-full flex-col items-center justify-center gap-4 rounded-md border border-dashed p-6">
+        <p className="text-muted-foreground">You have no units yet.</p>
+        <NewCategoryForm main />
+      </div>
+    )
 
   return (
     <>
@@ -45,7 +55,17 @@ async function CategoriesPage({ params, searchParams }: PageProps) {
         </div>
       </div>
       <CategoriesTable categories={categories?.items ?? []} />
-      <div className="flex justify-end py-4">
+      <div className="flex justify-between py-4">
+        {categories?.pageInfo.totalCount ? (
+          <p className="text-sm text-muted-foreground">
+            Showing {categories?.items.length} of{" "}
+            {categories?.pageInfo.totalCount} categories
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No categories to show.
+          </p>
+        )}
         <Suspense>
           <PaginationLinks
             currentPage={categories?.pageInfo?.currentPage!}

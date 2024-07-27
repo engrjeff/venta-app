@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache"
 import prisma from "@/prisma/client"
 import { createCategorySchema } from "@/schema/category"
+import { ItemStatus } from "@prisma/client"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
+import { z } from "zod"
 
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, getSkip } from "./config"
 import { authedProcedure } from "./procedures/auth"
@@ -16,7 +18,12 @@ import {
 
 export const getCategories = authedProcedure
   .createServerAction()
-  .input(withStoreId.merge(withPaginationAndSort))
+  .input(
+    withStoreId.merge(withPaginationAndSort).extend({
+      status: z.string().default("true"),
+      search: z.string().optional(),
+    })
+  )
   .handler(async ({ ctx, input }) => {
     try {
       const pageSize = input.limit ?? DEFAULT_PAGE_SIZE
@@ -25,6 +32,14 @@ export const getCategories = authedProcedure
         where: {
           ownerId: ctx.user.id,
           storeId: input.storeId,
+          status:
+            input.status === "inactive"
+              ? ItemStatus.INACTIVE
+              : ItemStatus.ACTIVE,
+          name: {
+            contains: input.search,
+            mode: "insensitive",
+          },
         },
         take: pageSize,
         skip: getSkip({ limit: input.limit, page: input.page }),
@@ -33,13 +48,28 @@ export const getCategories = authedProcedure
         },
       })
 
-      const total = await prisma.category.count({
+      const totalCount = await prisma.category.count({
         where: { storeId: input.storeId },
+      })
+
+      const total = await prisma.category.count({
+        where: {
+          storeId: input.storeId,
+          status:
+            input.status === "inactive"
+              ? ItemStatus.INACTIVE
+              : ItemStatus.ACTIVE,
+          name: {
+            contains: input.search,
+            mode: "insensitive",
+          },
+        },
       })
 
       const pageInfo = {
         currentPage: input.page ?? DEFAULT_PAGE,
         pageSize,
+        totalCount,
         totalPages: Math.ceil(total / pageSize),
       }
 
@@ -53,6 +83,7 @@ export const getCategories = authedProcedure
         pageInfo: {
           currentPage: DEFAULT_PAGE,
           pageSize: DEFAULT_PAGE_SIZE,
+          totalCount: 0,
           totalPages: 0,
         },
       }

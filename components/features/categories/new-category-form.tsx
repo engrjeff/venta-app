@@ -2,10 +2,11 @@
 
 import { useState } from "react"
 import { createCategory } from "@/actions/categories"
-import { PlusIcon } from "lucide-react"
+import { PlusCircleIcon } from "lucide-react"
 import { toast } from "sonner"
 import { useServerAction } from "zsa-react"
 
+import { cn } from "@/lib/utils"
 import { useCategories } from "@/hooks/useCategories"
 import { useCurrentStore } from "@/hooks/useCurrentStore"
 import { Button } from "@/components/ui/button"
@@ -37,9 +38,9 @@ export function NewCategoryForm({ initialValue, onAfterSave, main }: Props) {
         <Button
           size="sm"
           variant={main ? "default" : "secondary"}
-          className="w-full justify-start"
+          className={cn("justify-start", main ? "w-auto" : "w-full")}
         >
-          <PlusIcon className="mr-3 size-4" /> Add{" "}
+          <PlusCircleIcon className="mr-3 size-4" /> Add{" "}
           {initialValue ? `"${initialValue}"` : "New"}
         </Button>
       </DialogTrigger>

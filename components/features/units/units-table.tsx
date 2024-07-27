@@ -1,19 +1,21 @@
 "use client"
 
-import { Unit } from "@prisma/client"
+import { Suspense } from "react"
 import { ColumnDef } from "@tanstack/react-table"
 
+import { STATUS_OPTIONS } from "@/lib/options"
 import { Badge } from "@/components/ui/badge"
 import { DataTable } from "@/components/ui/data-table/data-table"
+import { DropdownFilterLinks } from "@/components/ui/data-table/dropdown-filter-links"
+import { FilterResetLink } from "@/components/ui/data-table/filter-reset-link"
 import { SortLink } from "@/components/ui/data-table/sort-link"
 import { useDataTable } from "@/components/ui/data-table/useDataTable"
-import { Input } from "@/components/ui/input"
+import { SearchField } from "@/components/shared/search-field"
 
+import { UnitWithConversion } from "./types"
 import { UnitRowActions } from "./unit-row-actions"
 
-// import { CategoryRowActions } from "./category-row-actions"
-
-export const columns: ColumnDef<Unit>[] = [
+export const columns: ColumnDef<UnitWithConversion>[] = [
   {
     id: "select",
     header: ({ table }) => <span>#</span>,
@@ -53,7 +55,7 @@ export const columns: ColumnDef<Unit>[] = [
 ]
 
 interface UnitsTableProps {
-  units: Unit[]
+  units: UnitWithConversion[]
 }
 
 export function UnitsTable({ units }: UnitsTableProps) {
@@ -62,31 +64,15 @@ export function UnitsTable({ units }: UnitsTableProps) {
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center space-x-2">
-        <Input
-          placeholder="Search units"
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="h-8 max-w-xs"
-        />
-        {/* {table.getColumn("type") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("type")}
-            title="Type"
-            options={PRODUCT_TYPES}
+        <Suspense>
+          <SearchField placeholder="Search units" />
+          <DropdownFilterLinks
+            paramKey="status"
+            title="Status"
+            options={STATUS_OPTIONS}
           />
-        )} */}
-        {/* {isFiltered && (
-          <Button
-            variant="ghost"
-            onClick={() => table.resetColumnFilters()}
-            className="h-8 px-2 lg:px-3"
-          >
-            Reset
-            <XIcon className="ml-2 size-4" />
-          </Button>
-        )} */}
+          <FilterResetLink />
+        </Suspense>
       </div>
       <DataTable table={table} columnLength={columns.length} />
     </div>

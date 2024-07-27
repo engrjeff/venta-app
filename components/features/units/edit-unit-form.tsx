@@ -1,27 +1,13 @@
-"use client"
-
-import { useState } from "react"
-import { createUnit } from "@/actions/units"
-import { CreateUnitInput, createUnitSchema } from "@/schema/unit"
+import { updateUnit } from "@/actions/units"
+import { EditUnitInput, editUnitSchema } from "@/schema/unit"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { MinusCircleIcon, PlusCircleIcon } from "lucide-react"
 import { FieldErrors, useFieldArray, useForm } from "react-hook-form"
-import { toast } from "sonner"
 import { useServerAction } from "zsa-react"
 
 import { cn } from "@/lib/utils"
-import { useCurrentStore } from "@/hooks/useCurrentStore"
-import { useUnits } from "@/hooks/useUnits"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { DialogClose, DialogFooter } from "@/components/ui/dialog"
 import {
   Form,
   FormControl,
@@ -33,119 +19,68 @@ import {
 import { Input } from "@/components/ui/input"
 import { NumberInput } from "@/components/ui/number-input"
 
-interface Props {
-  initialValue?: string
-  onAfterSave?: (newUnit: string) => void
-  main?: boolean
+import { UnitWithConversion } from "./types"
+
+interface EditUnitFormProps {
+  unit: UnitWithConversion
+  onAfterSave: () => void
 }
 
-export function NewUnitForm({ initialValue, onAfterSave, main }: Props) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant={main ? "default" : "secondary"}
-          className={cn("mb-1 justify-start", main ? "w-auto" : "w-full")}
-        >
-          <PlusCircleIcon className="mr-3 size-4" /> Add{" "}
-          {initialValue ? `"${initialValue}"` : "New"}
-        </Button>
-      </DialogTrigger>
-      <DialogContent
-        className="sm:max-w-lg"
-        onInteractOutside={(e) => e.preventDefault()}
-      >
-        <DialogHeader>
-          <DialogTitle>New Unit</DialogTitle>
-        </DialogHeader>
-        <UnitForm
-          initialValue={initialValue}
-          onAfterSave={(value) => {
-            if (onAfterSave) {
-              onAfterSave(value)
-            }
-            setOpen(false)
-          }}
-        />
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-function UnitForm({ initialValue, onAfterSave }: Props) {
-  const store = useCurrentStore()
-
-  const units = useUnits()
-
-  const form = useForm<CreateUnitInput>({
+export function EditUnitForm({ unit, onAfterSave }: EditUnitFormProps) {
+  const form = useForm<EditUnitInput>({
     mode: "all",
-    resolver: zodResolver(createUnitSchema),
+    resolver: zodResolver(editUnitSchema),
     defaultValues: {
-      name: initialValue ?? "",
-      storeId: store.data?.id,
+      id: unit.id,
+      name: unit.name ?? "",
+      conversions: unit.conversions?.map((c) => ({
+        id: c.id,
+        description: c.description ?? undefined,
+        name: c.name,
+        factor: c.factor.toString(),
+        to: c.to,
+      })),
     },
   })
 
-  const conversions = useFieldArray<CreateUnitInput>({
+  const conversions = useFieldArray<EditUnitInput>({
     control: form.control,
     name: "conversions",
   })
 
-  const createUnitAction = useServerAction(createUnit)
+  const editUnitAction = useServerAction(updateUnit)
 
-  const isBusy = createUnitAction.isPending || store.isLoading
+  const isBusy = editUnitAction.isPending
 
-  function onError(errors: FieldErrors<CreateUnitInput>) {
-    console.log(store.data?.id)
+  function onError(errors: FieldErrors<EditUnitInput>) {
     console.log(errors)
   }
 
-  async function onSubmit(values: CreateUnitInput) {
+  async function onSubmit(values: EditUnitInput) {
     try {
-      if (!store.data?.id) return
+      // const [result, err] = await editUnitAction.execute({
+      //   id: unit.id,
+      //   name: values.name,
+      //   conversions: values.conversions,
+      // })
 
-      const [result, err] = await createUnitAction.execute({
-        storeId: store.data?.id,
-        name: values.name,
-        conversions: values.conversions,
-      })
+      // if (err) {
+      //   toast.error(err.message)
+      //   return
+      // }
 
-      if (err) {
-        toast.error(err.message)
-        return
-      }
+      // toast.success("Unit saved!")
 
-      toast.success("Unit saved!")
-
-      await units.refetch()
-
-      if (result && onAfterSave) {
-        onAfterSave(result.id)
-      }
+      // onAfterSave()
+      alert("Not yet implemented")
+      onAfterSave()
     } catch (error) {}
   }
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={async (e) => {
-          const handler = form.handleSubmit(onSubmit, onError)
-
-          e.preventDefault()
-          e.stopPropagation()
-
-          await handler(e)
-        }}
-      >
+      <form onSubmit={form.handleSubmit(onSubmit, onError)}>
         <fieldset className="space-y-2" disabled={isBusy}>
-          <input
-            type="hidden"
-            {...form.register("storeId")}
-            defaultValue={store.data?.id ?? ""}
-          />
           <FormField
             control={form.control}
             name="name"
@@ -324,7 +259,7 @@ function UnitForm({ initialValue, onAfterSave }: Props) {
               Cancel
             </Button>
           </DialogClose>
-          <Button disabled={isBusy} loading={createUnitAction.isPending}>
+          <Button disabled={isBusy} loading={editUnitAction.isPending}>
             Save
           </Button>
         </DialogFooter>
