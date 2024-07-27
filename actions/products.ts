@@ -429,7 +429,6 @@ export const updateProductStatus = authedProcedure
 export const updateBulkProductStatus = authedProcedure
   .createServerAction()
   .input(changeBulkStatusSchema)
-
   .handler(async ({ ctx, input }) => {
     try {
       const result = await prisma.productServiceItem.updateMany({
