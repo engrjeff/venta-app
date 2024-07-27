@@ -42,6 +42,14 @@ async function ProductsAndServicesPage({ params, searchParams }: PageProps) {
     type: searchParams.type as ProductServiceType,
   })
 
+  if (products?.pageInfo.totalCount === 0)
+    return (
+      <div className="flex min-h-[75vh] w-full flex-col items-center justify-center gap-4 rounded-md border border-dashed p-6">
+        <p className="text-muted-foreground">You have no products yet.</p>
+        <NewButton forEmpty />
+      </div>
+    )
+
   return (
     <>
       <div className="absolute right-6 mb-2 flex items-center justify-between">
@@ -52,10 +60,14 @@ async function ProductsAndServicesPage({ params, searchParams }: PageProps) {
       </div>
       <ProductServiceTable products={products?.items ?? []} />
       <div className="flex justify-between py-4">
-        <p className="text-sm text-muted-foreground">
-          Showing {products?.items.length} of {products?.pageInfo.totalCount}{" "}
-          products
-        </p>
+        {products?.pageInfo.totalCount ? (
+          <p className="text-sm text-muted-foreground">
+            Showing {products?.items.length} of {products?.pageInfo.totalCount}{" "}
+            products
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">No products to show.</p>
+        )}
         <Suspense>
           <PaginationLinks
             currentPage={products?.pageInfo?.currentPage!}

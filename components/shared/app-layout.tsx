@@ -7,7 +7,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen w-full">
       <AppSideBar />
-      <div className="absolute inset-0 left-[240px] flex min-h-full flex-col bg-muted/40">
+      <div className="absolute inset-0 left-[240px] flex min-h-full flex-col">
         <AppHeader />
         <main>{children}</main>
       </div>
