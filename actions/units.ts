@@ -15,8 +15,9 @@ import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, getSkip } from "./config"
 import { authedProcedure } from "./procedures/auth"
 import { changeStatusSchema, withPaginationAndSort, withStoreId } from "./types"
 
-export const getStoreUnits = authedProcedure
-  .createServerAction()
+const action = authedProcedure.createServerAction()
+
+export const getStoreUnits = action
   .input(
     withStoreId.merge(withPaginationAndSort).extend({
       status: z.string().default("true"),
@@ -92,8 +93,7 @@ export const getStoreUnits = authedProcedure
     }
   })
 
-export const createUnit = authedProcedure
-  .createServerAction()
+export const createUnit = action
   .input(createUnitSchema)
   .handler(async ({ ctx, input }) => {
     try {
@@ -139,8 +139,7 @@ export const createUnit = authedProcedure
   })
 
 //  unit conversions
-export const createUnitConversion = authedProcedure
-  .createServerAction()
+export const createUnitConversion = action
   .input(conversionSchema.merge(withStoreId).extend({ unitId: z.string() }))
   .handler(async ({ ctx, input }) => {
     try {
@@ -168,8 +167,7 @@ export const createUnitConversion = authedProcedure
     }
   })
 
-export const updateUnitStatus = authedProcedure
-  .createServerAction()
+export const updateUnitStatus = action
   .input(changeStatusSchema)
   .handler(async ({ ctx, input }) => {
     try {
@@ -204,7 +202,6 @@ export const updateUnitStatus = authedProcedure
     }
   })
 
-export const updateUnit = authedProcedure
-  .createServerAction()
+export const updateUnit = action
   .input(editUnitSchema)
   .handler(async ({ ctx, input }) => {})

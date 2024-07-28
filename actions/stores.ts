@@ -5,20 +5,19 @@ import * as z from "zod"
 
 import { authedProcedure } from "./procedures/auth"
 
-export const getStores = authedProcedure
-  .createServerAction()
-  .handler(async ({ ctx }) => {
-    const stores = await prisma.store.findMany({
-      where: {
-        ownerId: ctx.user.id,
-      },
-    })
+const action = authedProcedure.createServerAction()
 
-    return stores
+export const getStores = action.handler(async ({ ctx }) => {
+  const stores = await prisma.store.findMany({
+    where: {
+      ownerId: ctx.user.id,
+    },
   })
 
-export const getStoreBySlug = authedProcedure
-  .createServerAction()
+  return stores
+})
+
+export const getStoreBySlug = action
   .input(z.object({ slug: z.string() }))
   .handler(async ({ ctx, input }) => {
     try {

@@ -6,8 +6,9 @@ import { z } from "zod"
 
 import { authedProcedure } from "./procedures/auth"
 
-export const getBookAccountsByLabel = authedProcedure
-  .createServerAction()
+const action = authedProcedure.createServerAction()
+
+export const getBookAccountsByLabel = action
   .input(
     z.object({ storeId: z.string(), label: z.nativeEnum(BookAccountLabel) })
   )

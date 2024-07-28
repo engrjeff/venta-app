@@ -16,8 +16,9 @@ import {
   withStoreId,
 } from "./types"
 
-export const getCategories = authedProcedure
-  .createServerAction()
+const action = authedProcedure.createServerAction()
+
+export const getCategories = action
   .input(
     withStoreId.merge(withPaginationAndSort).extend({
       status: z.string().default("true"),
@@ -90,8 +91,7 @@ export const getCategories = authedProcedure
     }
   })
 
-export const createCategory = authedProcedure
-  .createServerAction()
+export const createCategory = action
   .input(createCategorySchema)
   .handler(async ({ ctx, input }) => {
     try {
@@ -124,8 +124,7 @@ export const createCategory = authedProcedure
     }
   })
 
-export const updateCategoryStatus = authedProcedure
-  .createServerAction()
+export const updateCategoryStatus = action
   .input(changeStatusSchema)
   .handler(async ({ ctx, input }) => {
     try {
@@ -160,8 +159,7 @@ export const updateCategoryStatus = authedProcedure
     }
   })
 
-export const updateCategory = authedProcedure
-  .createServerAction()
+export const updateCategory = action
   .input(withEntityId.merge(createCategorySchema).partial())
   .handler(async ({ ctx, input }) => {
     try {

@@ -7,8 +7,9 @@ import { z } from "zod"
 
 import { authedProcedure } from "./procedures/auth"
 
-export const getSuppliers = authedProcedure
-  .createServerAction()
+const action = authedProcedure.createServerAction()
+
+export const getSuppliers = action
   .input(z.object({ storeId: z.string() }))
   .handler(async ({ ctx, input }) => {
     const suppliers = await prisma.supplier.findMany({
@@ -24,8 +25,7 @@ export const getSuppliers = authedProcedure
     return suppliers
   })
 
-export const createSupplier = authedProcedure
-  .createServerAction()
+export const createSupplier = action
   .input(createSupplierSchema)
   .handler(async ({ ctx, input }) => {
     try {

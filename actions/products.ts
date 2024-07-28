@@ -26,6 +26,7 @@ import {
 } from "@prisma/client/runtime/library"
 import pluralize from "pluralize"
 import { z } from "zod"
+import { inferServerActionReturnData } from "zsa"
 
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, getSkip } from "./config"
 import { authedProcedure } from "./procedures/auth"
@@ -36,8 +37,9 @@ import {
   withStoreId,
 } from "./types"
 
-export const getProductServiceItems = authedProcedure
-  .createServerAction()
+const action = authedProcedure.createServerAction()
+
+export const getProductServiceItems = action
   .input(
     withStoreId.merge(withPaginationAndSort).extend({
       status: z.string().default("true"),
@@ -137,14 +139,13 @@ export const getProductServiceItems = authedProcedure
     }
   })
 
-export type ProductItems = NonNullable<
-  Awaited<ReturnType<typeof getProductServiceItems>>["0"]
+export type ProductItems = inferServerActionReturnData<
+  typeof getProductServiceItems
 >
 
 export type ProductItem = ProductItems["items"][number]
 
-export const createInventoryProduct = authedProcedure
-  .createServerAction()
+export const createInventoryProduct = action
   .input(inventoryCreateSchema.merge(withStoreId))
   .handler(async ({ ctx, input }) => {
     try {
@@ -185,8 +186,7 @@ export const createInventoryProduct = authedProcedure
     }
   })
 
-export const createServiceProduct = authedProcedure
-  .createServerAction()
+export const createServiceProduct = action
   .input(serviceCreateSchema.merge(withStoreId))
   .handler(async ({ ctx, input }) => {
     try {
@@ -226,8 +226,7 @@ export const createServiceProduct = authedProcedure
     }
   })
 
-export const createNonInventoryProduct = authedProcedure
-  .createServerAction()
+export const createNonInventoryProduct = action
   .input(productCreateSchema.merge(withStoreId))
   .handler(async ({ ctx, input }) => {
     try {
@@ -267,8 +266,7 @@ export const createNonInventoryProduct = authedProcedure
     }
   })
 
-export const createInventoryAssembly = authedProcedure
-  .createServerAction()
+export const createInventoryAssembly = action
   .input(inventoryAssemblyCreateSchema.merge(withStoreId))
   .handler(async ({ ctx, input }) => {
     try {
@@ -319,8 +317,7 @@ export const createInventoryAssembly = authedProcedure
     }
   })
 
-export const copyProductAction = authedProcedure
-  .createServerAction()
+export const copyProductAction = action
   .input(copyProductSchema)
   .handler(async ({ ctx, input }) => {
     try {
@@ -390,8 +387,7 @@ export const copyProductAction = authedProcedure
     }
   })
 
-export const updateProductStatus = authedProcedure
-  .createServerAction()
+export const updateProductStatus = action
   .input(changeStatusSchema)
   .handler(async ({ ctx, input }) => {
     try {
@@ -426,8 +422,7 @@ export const updateProductStatus = authedProcedure
     }
   })
 
-export const updateBulkProductStatus = authedProcedure
-  .createServerAction()
+export const updateBulkProductStatus = action
   .input(changeBulkStatusSchema)
   .handler(async ({ ctx, input }) => {
     try {
@@ -452,8 +447,7 @@ export const updateBulkProductStatus = authedProcedure
     }
   })
 
-export const updateProduct = authedProcedure
-  .createServerAction()
+export const updateProduct = action
   .input(
     z.discriminatedUnion("type", [
       inventoryEditSchema,
@@ -610,8 +604,7 @@ async function updateInventoryAssembly(input: InventoryAssemblyEditInput) {
 }
 
 // for product select
-export const getProductServiceOptions = authedProcedure
-  .createServerAction()
+export const getProductServiceOptions = action
   .input(
     withStoreId.extend({
       search: z.string().optional(),
