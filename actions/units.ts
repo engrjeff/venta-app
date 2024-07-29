@@ -171,11 +171,11 @@ export const updateUnitStatus = action
   .input(changeStatusSchema)
   .handler(async ({ ctx, input }) => {
     try {
-      const category = await prisma.unit.findUnique({
+      const unit = await prisma.unit.findUnique({
         where: { id: input.id },
       })
 
-      if (!category) throw `Cannot find unit with ID ${input.id}`
+      if (!unit) throw `Cannot find unit with ID ${input.id}`
 
       const result = await prisma.unit.update({
         where: {
@@ -204,4 +204,100 @@ export const updateUnitStatus = action
 
 export const updateUnit = action
   .input(editUnitSchema)
-  .handler(async ({ ctx, input }) => {})
+  .handler(async ({ ctx, input }) => {
+    try {
+      const unit = await prisma.unit.findUnique({
+        where: { id: input.id },
+      })
+
+      if (!unit) throw `Cannot find unit with ID ${input.id}`
+
+      const { id, name, conversions } = input
+
+      const result = await prisma.unit.update({
+        where: {
+          id,
+        },
+        data: {
+          name,
+        },
+        include: {
+          store: {
+            select: {
+              slug: true,
+            },
+          },
+        },
+      })
+
+      if (conversions && conversions.length > 0) {
+        // append unitId
+        const conversionsWithUnitId = conversions.map((c) => ({
+          ...c,
+          unitId: id,
+          factor: Number(c.factor),
+          ownerId: result.ownerId,
+          storeId: result.storeId,
+        }))
+
+        const itemsForCreate = conversionsWithUnitId.filter((item) => !item.id)
+
+        const itemsForUpdate = conversionsWithUnitId.filter((item) => item.id)
+
+        const itemsToDelete = await prisma.unitConversion.findMany({
+          where: {
+            unitId: input.id,
+            AND: {
+              id: {
+                notIn: itemsForUpdate.map((item) => item.id) as string[],
+              },
+            },
+          },
+        })
+
+        if (itemsToDelete?.length) {
+          await prisma.unitConversion.deleteMany({
+            where: {
+              id: {
+                in: itemsToDelete.map((item) => item.id),
+              },
+            },
+          })
+        }
+
+        if (itemsForUpdate?.length) {
+          await Promise.all(
+            itemsForUpdate.map(
+              async (item) =>
+                await prisma.unitConversion.update({
+                  data: item,
+                  where: {
+                    id: item.id,
+                  },
+                })
+            )
+          )
+        }
+
+        if (itemsForCreate?.length) {
+          await prisma.unitConversion.createMany({
+            data: itemsForCreate,
+          })
+        }
+      }
+
+      // revalidate here
+      revalidatePath(`/${result.store.slug}/units`)
+
+      return result
+    } catch (error) {
+      if (typeof error === "string") throw error
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case "P2002":
+            throw `${input.name} already exists.`
+        }
+      }
+    }
+  })

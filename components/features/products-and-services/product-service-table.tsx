@@ -109,11 +109,14 @@ export const columns: ColumnDef<ProductItem>[] = [
     header: ({ column }) => {
       return <SortLink sortValue="initialQuantity" title="Qty on Hand" />
     },
-    cell: ({ row }) => (
-      <div className="text-center">
-        {row.getValue("initialQuantity")} {row.original.unit?.name}
-      </div>
-    ),
+    cell: ({ row }) =>
+      row.getValue("initialQuantity") ? (
+        <div className="text-center">
+          {row.getValue("initialQuantity")} {row.original.unit?.name}
+        </div>
+      ) : (
+        <div className="text-center">--</div>
+      ),
   },
   {
     accessorKey: "reorderPoint",

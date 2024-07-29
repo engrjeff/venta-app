@@ -89,7 +89,9 @@ export const getProductServiceItems = action
         unit: item.unit
           ? {
               id: item.unit?.id,
-              name: pluralize(item.unit.name, item.initialQuantity ?? 0),
+              name: item.initialQuantity
+                ? pluralize(item.unit.name, item.initialQuantity ?? 0)
+                : item.unit.name,
             }
           : undefined,
       }))
@@ -327,6 +329,8 @@ export const copyProductAction = action
           bundledProducts: {
             select: {
               id: true,
+              quantity: true,
+              productId: true,
             },
           },
         },
@@ -351,7 +355,12 @@ export const copyProductAction = action
           name: input.name,
           sku: input.sku,
           bundledProducts: {
-            connect: bundledProducts,
+            createMany: {
+              data: bundledProducts.map((b) => ({
+                productId: b.productId,
+                quantity: b.quantity,
+              })),
+            },
           },
         },
         include: {

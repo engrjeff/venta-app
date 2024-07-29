@@ -41,7 +41,7 @@ export function NewButton({ forEmpty }: { forEmpty?: boolean }) {
           onInteractOutside={(e) => {
             e.preventDefault()
           }}
-          className="overflow-y-auto p-0 sm:max-w-xl"
+          className="overflow-y-auto p-0 sm:max-w-2xl"
         >
           <SheetHeader className="border-b p-4">
             <SheetTitle>Products & Services</SheetTitle>

@@ -3,6 +3,7 @@ import { EditUnitInput, editUnitSchema } from "@/schema/unit"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { MinusCircleIcon, PlusCircleIcon } from "lucide-react"
 import { FieldErrors, useFieldArray, useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { useServerAction } from "zsa-react"
 
 import { cn } from "@/lib/utils"
@@ -58,21 +59,20 @@ export function EditUnitForm({ unit, onAfterSave }: EditUnitFormProps) {
 
   async function onSubmit(values: EditUnitInput) {
     try {
-      // const [result, err] = await editUnitAction.execute({
-      //   id: unit.id,
-      //   name: values.name,
-      //   conversions: values.conversions,
-      // })
+      const [result, err] = await editUnitAction.execute({
+        id: unit.id,
+        name: values.name,
+        conversions: values.conversions,
+      })
 
-      // if (err) {
-      //   toast.error(err.message)
-      //   return
-      // }
+      if (err) {
+        toast.error(err.message)
+        return
+      }
 
-      // toast.success("Unit saved!")
+      toast.success("Unit saved!")
 
-      // onAfterSave()
-      alert("Not yet implemented")
+      onAfterSave()
       onAfterSave()
     } catch (error) {}
   }
